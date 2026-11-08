@@ -21,8 +21,8 @@ import { Dot, Pill, type Tone } from "@/components/ui/status";
 import { Segmented } from "@/components/ui/tabs";
 import { can, canDecide } from "@/lib/authz";
 import { cn } from "@/lib/cn";
-import { formatClock, formatMinutes, REQUIRED_MINUTES, weekEnd, formatTime } from "@/lib/domain/activity";
-import { exemptReason, memberWeek, openRequests, roster } from "@/lib/preview/derived";
+import { DEFAULT_WEEK, formatClock, formatMinutes, REQUIRED_MINUTES, weekEnd, weekStart, formatTime } from "@/lib/domain/activity";
+import { exemptReason, memberDaily, memberWeek, openRequests, roster } from "@/lib/preview/derived";
 import { useMe, useNow } from "@/lib/preview/hooks";
 import { memberById, notificationsFor, usePreviewState, type PatrolDistrict, type PreviewState } from "@/lib/preview/store";
 import { stateTone } from "@/lib/request-tone";
@@ -49,7 +49,7 @@ export function Dashboard() {
     <Page wide>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-2xs font-medium text-muted">{new Date(now).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+          <p className="text-2xs font-medium text-muted">{new Date(now).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "America/New_York" })}</p>
           <h1 className="display mt-1 text-xl leading-tight font-bold tracking-tight text-balance sm:text-2xl">
             {greeting(now)}, {me.member.name}
           </h1>
@@ -80,6 +80,7 @@ export function Dashboard() {
         </div>
 
         <aside aria-label="Your work" className="flex min-w-0 flex-col gap-5 xl:gap-6">
+          {probationary ? null : <WeekStrip state={state} now={now} />}
           {isSupervisor ? <ReviewQueue state={state} /> : null}
           <TrainingProgress probationary={probationary} />
           <QuickAccess />
@@ -140,6 +141,7 @@ function DutyHero({ state, now }: { state: PreviewState; now: number }) {
         </div>
 
         <div className="flex flex-col items-stretch gap-2.5 md:items-end">
+          <OnDutyStack state={state} />
           {onDuty ? (
             <>
               <ButtonLink href="/hq/patrol" variant="gold" size="lg">
@@ -172,6 +174,100 @@ function DutyHero({ state, now }: { state: PreviewState; now: number }) {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Who else is on patrol right now: overlapping avatars and a count. Hidden when nobody is. */
+function OnDutyStack({ state }: { state: PreviewState }) {
+  const open = state.sessions.filter((s) => s.end === null);
+  if (!open.length) return null;
+  const people = open.map((s) => memberById(s.memberId)).filter((m): m is NonNullable<typeof m> => !!m);
+  const shown = people.slice(0, 4);
+  return (
+    <Link
+      href="/hq/patrol"
+      className="mb-1 flex items-center gap-2.5 self-start rounded-full py-1 pr-3 pl-1 text-2xs text-on-dark-muted ring-1 ring-white/10 transition-colors ring-inset hover:bg-white/6 hover:text-on-dark md:self-end"
+      aria-label={`${open.length} on duty now: ${people.map((p) => p.name).join(", ")}`}
+    >
+      <span aria-hidden className="flex -space-x-1.5">
+        {shown.map((m) => (
+          <span key={m.id} className="rounded-full bg-obsidian p-0.5">
+            <Avatar name={m.name} size={24} dark />
+          </span>
+        ))}
+        {people.length > shown.length ? (
+          <span className="rounded-full bg-obsidian p-0.5">
+            <span className="inline-flex size-6 items-center justify-center rounded-full bg-graphite text-3xs font-semibold text-on-dark">+{people.length - shown.length}</span>
+          </span>
+        ) : null}
+      </span>
+      <span className="flex items-center gap-1.5">
+        <Dot tone="gold" live /> <span className="font-semibold text-on-dark tabular">{open.length}</span> on duty now
+      </span>
+    </Link>
+  );
+}
+
+// ---------------------------------------------------------------- week strip
+
+const tz = DEFAULT_WEEK.timeZone;
+const dayKey = (t: number) => new Date(t).toLocaleDateString("en-CA", { timeZone: tz });
+
+/**
+ * The member's activity week as a calendar strip: one cell per day, today
+ * highlighted, minutes logged under each day. Week boundaries follow the
+ * interim Monday / Tampa time rule (PC-14).
+ */
+function WeekStrip({ state, now }: { state: PreviewState; now: number }) {
+  const me = useMe()!;
+  const daily = memberDaily(state, me.member.id, now);
+  const start = weekStart(new Date(now)).getTime();
+  const days = daily.map((minutes, i) => {
+    const t = start + i * 86400000 + 12 * 3600000; // midday avoids DST edges
+    return {
+      t,
+      minutes,
+      weekday: new Date(t).toLocaleDateString("en-US", { weekday: "short", timeZone: tz }),
+      date: new Date(t).toLocaleDateString("en-US", { day: "numeric", timeZone: tz }),
+      today: dayKey(t) === dayKey(now),
+      future: dayKey(t) > dayKey(now),
+    };
+  });
+  const total = memberWeek(state, me.member.id, now); // same figure as the duty hero
+  const daysOut = daily.filter((m) => m > 0).length;
+  const monthLabel = new Date(now).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: tz });
+  return (
+    <Card>
+      <CardHeader
+        title={monthLabel}
+        description={`${daysOut} patrol day${daysOut === 1 ? "" : "s"} this week · ${formatMinutes(total)} logged`}
+        action={
+          <Link href="/hq/activity" className="text-2xs font-semibold text-gold-ink hover:underline">
+            Activity
+          </Link>
+        }
+      />
+      <ol aria-label="This week" className="grid grid-cols-7 gap-1 px-3 pb-3.5">
+        {days.map((d) => (
+          <li
+            key={d.t}
+            aria-current={d.today ? "date" : undefined}
+            className={cn(
+              "flex flex-col items-center gap-1 rounded-lg py-2 text-center",
+              d.today ? "bg-obsidian text-on-dark shadow-sm ring-1 ring-gold/25 ring-inset" : d.future ? "opacity-45" : undefined,
+            )}
+          >
+            <span className={cn("text-3xs", d.today ? "text-on-dark-muted" : "text-muted")}>{d.weekday}</span>
+            <span className={cn("display text-sm leading-none font-semibold tabular", d.today && "text-gold")}>{d.date}</span>
+            <span aria-hidden className={cn("mt-0.5 size-1.5 rounded-full", d.minutes > 0 ? "bg-gold" : d.today ? "bg-white/15" : "bg-line-strong/60")} />
+            <span className={cn("text-3xs tabular", d.minutes > 0 ? (d.today ? "text-on-dark" : "font-medium text-ink-2") : d.today ? "text-on-dark-muted" : "text-muted")}>
+              {d.minutes > 0 ? formatMinutes(d.minutes) : "—"}
+              <span className="sr-only">{d.minutes > 0 ? " patrolled" : " no patrol"}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </Card>
   );
 }
 
@@ -467,7 +563,7 @@ function CommandShortcut({ state, now }: { state: PreviewState; now: number }) {
   const overdue = openRequests(state).filter((r) => r.dueAt && r.dueAt < now).length;
   const onDuty = state.sessions.filter((s) => s.end === null).length;
   return (
-    <Link href="/hq/command" className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-edge bg-surface px-4 py-3 text-xs shadow-card transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md">
+    <Link href="/hq/command" className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-edge bg-surface px-4 py-3 text-xs shadow-card transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md">
       <span className="flex items-center gap-2 font-semibold">
         <Gauge className="size-4 text-gold-ink" aria-hidden /> Command Center
       </span>
@@ -537,7 +633,7 @@ function TrainingProgress({ probationary }: { probationary: boolean }) {
 }
 
 function QuickAccess() {
-  const tile = "flex items-center gap-2 rounded-lg border border-edge bg-surface px-3 py-2.5 text-xs font-medium shadow-card transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md";
+  const tile = "flex items-center gap-2 rounded-xl border border-edge bg-surface px-3 py-2.5 text-xs font-medium shadow-card transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md";
   return (
     <nav aria-label="Quick access">
       <h2 className="mb-2 text-sm font-semibold text-ink">Quick access</h2>
@@ -547,7 +643,7 @@ function QuickAccess() {
             <ExternalLink className="size-4 text-gold-ink" aria-hidden /> AnchorCAD
           </a>
         ) : (
-          <span title="The AnchorCAD link has not been configured yet" className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-line-strong px-3 py-2 text-xs font-medium text-muted">
+          <span title="The AnchorCAD link has not been configured yet" className="flex cursor-not-allowed items-center gap-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-xs font-medium text-muted">
             <ExternalLink className="size-4 shrink-0" aria-hidden />
             <span className="leading-tight">
               AnchorCAD

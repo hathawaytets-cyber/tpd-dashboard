@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 
 /** Base container. Use sparingly: group by whitespace and rules before reaching for a card. */
 export function Card({ className, ...props }: ComponentProps<"section">) {
-  return <section className={cn("rounded-lg border border-edge bg-surface shadow-card", className)} {...props} />;
+  return <section className={cn("rounded-xl border border-edge bg-surface shadow-card", className)} {...props} />;
 }
 
 export function CardHeader({
