@@ -4,7 +4,8 @@ import { cn } from "@/lib/cn";
 export type Tone = "neutral" | "gold" | "green" | "amber" | "red" | "info" | "dark";
 
 const pill: Record<Tone, string> = {
-  neutral: "bg-sunken text-ink-2 ring-line",
+  // Neutral is the resting state: no ring, so exceptions (amber, red, info) carry the colour.
+  neutral: "bg-sunken text-ink-2 ring-transparent",
   gold: "bg-gold-soft text-gold-ink ring-gold/30",
   green: "bg-green-soft text-green ring-green/20",
   amber: "bg-amber-soft text-amber ring-amber/20",

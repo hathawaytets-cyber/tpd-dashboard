@@ -10,8 +10,8 @@ export function PageHeader({ eyebrow, title, description, actions, meta }: { eye
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
-        {eyebrow ? <p className="mb-1.5 text-2xs font-semibold text-gold-ink">{eyebrow}</p> : null}
-        <h1 className="display text-2xl leading-tight font-bold tracking-tight text-ink">{title}</h1>
+        {eyebrow ? <p className="mb-1.5 text-2xs font-medium text-muted">{eyebrow}</p> : null}
+        <h1 className="display text-xl leading-tight font-bold tracking-tight text-balance text-ink sm:text-2xl">{title}</h1>
         {description ? <p className="mt-1.5 max-w-2xl text-sm text-muted">{description}</p> : null}
         {meta ? <div className="mt-2.5 flex flex-wrap items-center gap-2">{meta}</div> : null}
       </div>

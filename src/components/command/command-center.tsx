@@ -148,7 +148,7 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
 
   const columns: Column<RequestRecord>[] = [
     { key: "type", header: "Request type", sort: (r) => r.type, cell: (r) => <span className="font-semibold text-ink">{r.type}</span> },
-    { key: "id", header: "ID", sort: (r) => r.id, cell: (r) => <span className="text-ink-2 tabular">{r.id}</span> },
+    { key: "id", header: "ID", sort: (r) => r.id, cell: (r) => <span className="text-2xs text-muted tabular">{r.id}</span> },
     {
       key: "member",
       header: "Member",
@@ -169,7 +169,7 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
       },
     },
     { key: "district", header: "District", hideable: true, sort: (r) => memberById(r.memberId)!.district, cell: (r) => memberById(r.memberId)!.district },
-    { key: "summary", header: "Summary", hideable: true, sort: (r) => r.summary, cell: (r) => <span className="block max-w-[200px] truncate text-ink-2 2xl:max-w-[320px]" title={r.summary}>{r.summary}</span> },
+    { key: "summary", header: "Summary", hideable: true, sort: (r) => r.summary, cell: (r) => <span className="block max-w-[160px] truncate text-ink-2 2xl:max-w-[320px]" title={r.summary}>{r.summary}</span> },
     {
       key: "reviewer",
       header: "Reviewer",
@@ -667,7 +667,7 @@ function DivisionCapacity() {
 function AccessDenied({ rank }: { rank: string }) {
   return (
     <Page>
-      <div className="mx-auto mt-10 max-w-md rounded-xl border border-line bg-surface p-8 text-center shadow-sm">
+      <div className="mx-auto mt-10 max-w-md rounded-xl border border-edge bg-surface p-8 text-center shadow-card">
         <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-obsidian text-gold">
           <Lock className="size-5" aria-hidden />
         </span>

@@ -13,10 +13,15 @@
   --surface-2: #faf9f5;
   --sunken: #eceae3;
   --ink: #121317;
-  --ink-2: #3b414b;
-  --muted: #5f6773;
-  --line: #e3e0d7;
-  --line-strong: #cfcbbf;
+  /* Greys are tinted toward the warm ivory canvas so text and rules sit in the
+     same temperature as the background (Refactoring UI: "greys don't have to be grey"). */
+  --ink-2: #3d3b36;
+  --muted: #67635a;
+  --line: #e7e3da;
+  --line-strong: #cfcabd;
+  /* Card edge: a translucent hairline that reads as the card's own shadow
+     rather than a drawn box. Dark theme falls back to a solid rule. */
+  --edge: rgb(41 37 28 / 0.09);
   --gold: #d5ab36;
   --gold-hover: #e2c057;
   --gold-ink: #7a5c0e;
@@ -36,9 +41,13 @@
   --info-soft: #e6edf8;
   --focus: #7a5c0e;
   --overlay: rgb(16 17 19 / 0.45);
-  --shadow-sm: 0 1px 2px rgb(18 19 23 / 0.06);
-  --shadow-md: 0 1px 2px rgb(18 19 23 / 0.04), 0 8px 24px -12px rgb(18 19 23 / 0.18);
-  --shadow-lg: 0 2px 4px rgb(18 19 23 / 0.06), 0 24px 48px -16px rgb(18 19 23 / 0.32);
+  /* Elevation: each level pairs a tight contact shadow with a softer ambient
+     one, both tinted warm. sm = controls, card = resting panels, md = raised,
+     lg = overlays. */
+  --shadow-sm: 0 1px 2px rgb(41 37 28 / 0.07);
+  --shadow-card: 0 1px 2px rgb(41 37 28 / 0.05), 0 2px 6px -2px rgb(41 37 28 / 0.06);
+  --shadow-md: 0 1px 2px rgb(41 37 28 / 0.05), 0 8px 24px -12px rgb(41 37 28 / 0.2);
+  --shadow-lg: 0 2px 4px rgb(41 37 28 / 0.06), 0 24px 48px -16px rgb(41 37 28 / 0.32);
 
   /* Always-dark surfaces: sidebar, duty console, public hero. */
   --obsidian: #101113;
@@ -78,6 +87,8 @@
     --focus: #d5ab36;
     --overlay: rgb(0 0 0 / 0.6);
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+    --edge: var(--line);
     --shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px -12px rgb(0 0 0 / 0.7);
     --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 28px 56px -16px rgb(0 0 0 / 0.8);
     --obsidian: #08090a;
@@ -114,6 +125,8 @@
   --focus: #d5ab36;
   --overlay: rgb(0 0 0 / 0.6);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+  --edge: var(--line);
   --shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px -12px rgb(0 0 0 / 0.7);
   --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 28px 56px -16px rgb(0 0 0 / 0.8);
   --obsidian: #08090a;
@@ -131,6 +144,7 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-edge: var(--edge);
   --color-gold: var(--gold);
   --color-gold-hover: var(--gold-hover);
   --color-gold-ink: var(--gold-ink);
@@ -157,6 +171,7 @@
   --color-on-dark: var(--on-dark);
   --color-on-dark-muted: var(--on-dark-muted);
   --shadow-sm: var(--shadow-sm);
+  --shadow-card: var(--shadow-card);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --font-sans: "Archivo Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;

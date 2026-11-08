@@ -112,3 +112,10 @@ Not deployed: the live preview does not include Phase 2.
 - Shared project audited read-only: District Five authorization is membership/admin based (RLS plus SECURITY DEFINER RPCs, no table write grants for `anon`/`authenticated`), so a TPD login gets only a profile row. `tpd` grants are SELECT-only for `authenticated`, none for `anon`. Findings for dede (District Five side, not changed): email sign-ups are enabled and `handle_new_user` copies `provider_id` from user-editable metadata, so an email sign-up could claim a pre-seeded District Five roster slot; today there are 0 such slots and 0 email identities.
 - Roster removals: deferred until approved or seen in 3 independent snapshots (migration `20261105000100`). Approval is bound to the previewed snapshot hash.
 - Edge Functions: authenticate before parsing bodies, constant-time secret check, body size and shape limits, 81 HTTP-level negative tests. Live 405/401 probes recorded in the activation checklist.
+
+## Refactoring UI pass on HQ · complete in development, not deployed (2026-11-08)
+- Tokens: warm-tinted greys (muted AA ≥ 4.97:1 everywhere), lighter in-panel dividers, `edge` outline and layered warm `shadow-card` elevation; dark theme unchanged apart from the new tokens.
+- Hierarchy: 14 px panel titles, larger DataList values, muted eyebrows, sentence-case nav groups, smaller page titles on phones.
+- Emphasis: resting states ("Recorded", "Active") as muted text; neutral pill without ring; quiet repeated row links; compact empty states with direction; AnchorCAD tile states "Not set up yet" once.
+- Command Center decision queue now fits at 1440 px (Actions column was clipped).
+- Lint, typecheck, 190 unit and 32 e2e tests pass. Screenshots: project files `redesign/refactoring-ui/` (before/after).

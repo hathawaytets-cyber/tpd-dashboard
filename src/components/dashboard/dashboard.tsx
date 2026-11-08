@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { ArrowRight, ArrowUpRight, BookOpen, Car, CheckCircle2, ClipboardList, ExternalLink, Gauge, GraduationCap, Lock, Radio, ShieldCheck, Square } from "lucide-react";
-import { sessionStatus } from "@/components/patrol/session-drawer";
+import { SessionStatusLabel, sessionStatus } from "@/components/patrol/session-drawer";
 import { ANNOUNCEMENTS } from "@/lib/announcements";
 import { HANDBOOK_URL } from "@/lib/public-nav";
 import { usePatrol } from "@/components/patrol/patrol-provider";
@@ -49,8 +49,8 @@ export function Dashboard() {
     <Page wide>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-2xs font-semibold text-gold-ink">{new Date(now).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
-          <h1 className="display mt-1 text-2xl font-bold tracking-tight">
+          <p className="text-2xs font-medium text-muted">{new Date(now).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+          <h1 className="display mt-1 text-xl leading-tight font-bold tracking-tight text-balance sm:text-2xl">
             {greeting(now)}, {me.member.name}
           </h1>
           <p className="mt-1 text-xs text-muted">
@@ -242,7 +242,7 @@ export function ReviewQueue({ state }: { state: PreviewState }) {
         }
       />
       {queue.length === 0 ? (
-        <p className="border-t border-line px-4 py-6 text-center text-2xs text-muted">Nothing needs your decision.</p>
+        <EmptyState compact className="border-t border-line" icon={<CheckCircle2 />} title="You're caught up" body="New requests you can decide will appear here." />
       ) : (
         <ul className="divide-y divide-line border-t border-line">
           {queue.slice(0, 4).map((r) => {
@@ -252,10 +252,10 @@ export function ReviewQueue({ state }: { state: PreviewState }) {
                 <Link href={isCommand ? `/hq/command?id=${r.id}` : `/hq/requests?id=${r.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-2">
                   <Avatar name={who.name} size={26} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium">
+                    <p className="truncate text-xs font-semibold">
                       {r.type} <span className="font-normal text-muted">· {who.name}</span>
                     </p>
-                    <p className="truncate text-3xs text-muted">{r.summary}</p>
+                    <p className="mt-0.5 truncate text-2xs text-muted">{r.summary}</p>
                   </div>
                   <ArrowUpRight className="size-3.5 text-muted" aria-hidden />
                 </Link>
@@ -377,10 +377,10 @@ function RecentPatrols({ state }: { state: PreviewState }) {
                     <td className="hidden px-3 py-2.5 sm:table-cell">{s.district}</td>
                     <td className="px-3 py-2.5 text-right font-semibold tabular">{formatMinutes(Math.floor((s.end! - s.start) / 60000))}</td>
                     <td className="hidden px-3 py-2.5 sm:table-cell">
-                      <Pill tone={st.tone}>{st.label}</Pill>
+                      <SessionStatusLabel session={s} />
                     </td>
                     <td className="px-4 py-2.5 text-right">
-                      <Link href={`/hq/patrol?session=${s.id}#history`} className="text-2xs font-semibold text-gold-ink hover:underline" aria-label={`View session ${s.id}`}>
+                      <Link href={`/hq/patrol?session=${s.id}#history`} className="text-2xs font-medium text-muted transition-colors hover:text-gold-ink hover:underline" aria-label={`View session ${s.id}`}>
                         View
                       </Link>
                     </td>
@@ -435,15 +435,21 @@ function MyAttention({ state, probationary }: { state: PreviewState; probationar
         }
       />
       {items.length === 0 ? (
-        <p className="border-t border-line px-4 py-6 text-center text-2xs text-muted">Nothing needs your attention. Requests, flagged sessions and training appear here.</p>
+        <EmptyState
+          compact
+          className="border-t border-line"
+          icon={<CheckCircle2 />}
+          title="Nothing needs you right now"
+          body="Pending requests, sessions sent for review and outstanding training will show up here."
+        />
       ) : (
         <ul className="divide-y divide-line border-t border-line">
           {items.map((i) => (
             <li key={i.key}>
               <Link href={i.href} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-2">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium">{i.title}</p>
-                  <p className="truncate text-3xs text-muted">{i.detail}</p>
+                  <p className="truncate text-xs font-semibold">{i.title}</p>
+                  <p className="mt-0.5 truncate text-2xs text-muted">{i.detail}</p>
                 </div>
                 {i.pill ? <Pill tone={i.pill.tone}>{i.pill.label}</Pill> : null}
               </Link>
@@ -461,7 +467,7 @@ function CommandShortcut({ state, now }: { state: PreviewState; now: number }) {
   const overdue = openRequests(state).filter((r) => r.dueAt && r.dueAt < now).length;
   const onDuty = state.sessions.filter((s) => s.end === null).length;
   return (
-    <Link href="/hq/command" className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-line bg-surface px-4 py-3 text-xs shadow-sm transition-colors hover:border-line-strong">
+    <Link href="/hq/command" className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-edge bg-surface px-4 py-3 text-xs shadow-card transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md">
       <span className="flex items-center gap-2 font-semibold">
         <Gauge className="size-4 text-gold-ink" aria-hidden /> Command Center
       </span>
@@ -531,18 +537,22 @@ function TrainingProgress({ probationary }: { probationary: boolean }) {
 }
 
 function QuickAccess() {
-  const tile = "flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2.5 text-xs font-medium shadow-sm transition-colors hover:border-line-strong";
+  const tile = "flex items-center gap-2 rounded-lg border border-edge bg-surface px-3 py-2.5 text-xs font-medium shadow-card transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md";
   return (
     <nav aria-label="Quick access">
-      <h2 className="mb-2 text-3xs font-semibold text-muted">Quick access</h2>
+      <h2 className="mb-2 text-sm font-semibold text-ink">Quick access</h2>
       <div className="grid grid-cols-2 gap-2">
         {ANCHORCAD_URL ? (
           <a href={ANCHORCAD_URL} target="_blank" rel="noopener noreferrer" className={tile}>
             <ExternalLink className="size-4 text-gold-ink" aria-hidden /> AnchorCAD
           </a>
         ) : (
-          <span title="The AnchorCAD link has not been configured yet" className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-line px-3 py-2.5 text-xs font-medium text-muted">
-            <ExternalLink className="size-4" aria-hidden /> AnchorCAD <span className="sr-only">(not configured)</span>
+          <span title="The AnchorCAD link has not been configured yet" className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-line-strong px-3 py-2 text-xs font-medium text-muted">
+            <ExternalLink className="size-4 shrink-0" aria-hidden />
+            <span className="leading-tight">
+              AnchorCAD
+              <span className="block text-3xs font-normal">Not set up yet</span>
+            </span>
           </span>
         )}
         <a href={HANDBOOK_URL} target="_blank" rel="noopener noreferrer" className={tile}>
@@ -555,7 +565,6 @@ function QuickAccess() {
           <ClipboardList className="size-4 text-gold-ink" aria-hidden /> Requests
         </Link>
       </div>
-      {!ANCHORCAD_URL ? <p className="mt-1.5 text-3xs text-muted">AnchorCAD link not configured yet.</p> : null}
     </nav>
   );
 }
@@ -571,15 +580,15 @@ function Announcements() {
             <li key={a.title}>
               {external ? (
                 <a href={a.href} target="_blank" rel="noopener noreferrer" className="block px-4 py-3 transition-colors hover:bg-surface-2">
-                <p className="text-3xs font-semibold text-gold-ink">{a.date}</p>
-                <p className="mt-0.5 text-xs font-medium">{a.title}</p>
-                <p className="mt-0.5 line-clamp-2 text-3xs text-muted">{a.body}</p>
+                <p className="text-xs font-semibold">{a.title}</p>
+                <p className="mt-0.5 line-clamp-2 text-2xs text-muted">{a.body}</p>
+                <p className="mt-1.5 text-3xs text-muted tabular">{a.date}</p>
                 </a>
               ) : (
                 <Link href={a.href} className="block px-4 py-3 transition-colors hover:bg-surface-2">
-                <p className="text-3xs font-semibold text-gold-ink">{a.date}</p>
-                <p className="mt-0.5 text-xs font-medium">{a.title}</p>
-                <p className="mt-0.5 line-clamp-2 text-3xs text-muted">{a.body}</p>
+                <p className="text-xs font-semibold">{a.title}</p>
+                <p className="mt-0.5 line-clamp-2 text-2xs text-muted">{a.body}</p>
+                <p className="mt-1.5 text-3xs text-muted tabular">{a.date}</p>
                 </Link>
               )}
             </li>

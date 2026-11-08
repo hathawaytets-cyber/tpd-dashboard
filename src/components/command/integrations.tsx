@@ -85,7 +85,7 @@ export function IntegrationsWorkspace() {
           Checking your access…
         </p>
       ) : !allowed ? (
-        <div className="mx-auto mt-6 max-w-md rounded-xl border border-line bg-surface p-8 text-center shadow-sm">
+        <div className="mx-auto mt-6 max-w-md rounded-xl border border-edge bg-surface p-8 text-center shadow-card">
           <Lock aria-hidden className="mx-auto size-5 text-gold-ink" />
           <h2 className="display mt-3 text-lg font-bold">Command access required</h2>
           <p className="mt-2 text-xs text-muted">Access: {ACCESS_NOTE["command.view"]}, verified from the roster after Discord sign-in. The server enforces this on every request.</p>

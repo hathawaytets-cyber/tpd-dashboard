@@ -112,7 +112,8 @@ export function PersonnelWorkspace() {
       sort: (r) => r.member.status,
       cell: (r) => (
         <span className="inline-flex items-center gap-2">
-          <Pill tone={STATUS_TONE[r.member.status]}>{r.member.status}</Pill>
+          {/* "Active" is the normal state for almost every row, so it stays quiet; exceptions get a pill. */}
+          {r.member.status === "Active" ? <span className="text-2xs text-muted">Active</span> : <Pill tone={STATUS_TONE[r.member.status]}>{r.member.status}</Pill>}
           {r.onDuty ? (
             <span className="inline-flex items-center gap-1 text-3xs font-semibold text-gold-ink">
               <Dot tone="gold" live /> On duty
