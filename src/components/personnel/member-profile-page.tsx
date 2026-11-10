@@ -25,7 +25,7 @@ export function MemberProfilePage({ id }: { id: string }) {
         <Skeleton className="h-96 rounded-lg" />
       ) : (
         <>
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-surface p-5 shadow-sm">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-edge bg-surface p-5 shadow-card">
             <ProfileHeader member={member} state={state} now={now} as="h1" />
             <AdminActions member={member} />
           </div>

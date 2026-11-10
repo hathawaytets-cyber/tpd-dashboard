@@ -28,7 +28,7 @@ export function SupervisorWorkspace() {
   if (!can(me.actor, "supervisor.view")) {
     return (
       <Page>
-        <div className="mx-auto mt-10 max-w-md rounded-xl border border-line bg-surface p-8 text-center shadow-sm">
+        <div className="mx-auto mt-10 max-w-md rounded-xl border border-edge bg-surface p-8 text-center shadow-card">
           <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-obsidian text-gold">
             <Lock className="size-5" aria-hidden />
           </span>

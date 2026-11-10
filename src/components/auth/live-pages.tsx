@@ -164,7 +164,7 @@ export function LiveCommand() {
   if (!allowed)
     return (
       <Page>
-        <div className="mx-auto mt-10 max-w-md rounded-xl border border-line bg-surface p-8 text-center shadow-sm">
+        <div className="mx-auto mt-10 max-w-md rounded-xl border border-edge bg-surface p-8 text-center shadow-card">
           <h1 className="display text-xl font-bold">Command Center is restricted</h1>
           <p className="mt-2 text-xs text-muted">Access: Captain and above (interim rule pending leadership, PC-08). Your rank is {verified.rank}. The same rule is enforced by the database, not only by this page.</p>
           <ButtonLink href="/hq" variant="secondary" className="mt-5">

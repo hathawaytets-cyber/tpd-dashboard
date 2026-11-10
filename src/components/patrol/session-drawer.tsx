@@ -22,6 +22,15 @@ export function sessionStatus(s: SessionRecord): { label: string; tone: "gold" |
 }
 
 /**
+ * Status cell for session lists. "Recorded" is the normal case, so it is plain
+ * text; only states that need attention get a coloured pill.
+ */
+export function SessionStatusLabel({ session }: { session: SessionRecord }) {
+  const st = sessionStatus(session);
+  return st.tone === "neutral" ? <span className="text-2xs text-muted">{st.label}</span> : <Pill tone={st.tone}>{st.label}</Pill>;
+}
+
+/**
  * Detail drawer for one patrol session. Visible to the session's owner and to
  * supervisors (`supervisor.view`); anyone else gets a refusal, not the record.
  */

@@ -82,7 +82,37 @@ export function Skeleton({ className }: { className?: string }) {
   );
 }
 
-export function EmptyState({ icon, title, body, action, className }: { icon?: ReactNode; title: string; body?: string; action?: ReactNode; className?: string }) {
+/**
+ * Empty states are a prompt to act, not a shrug. `compact` is the in-card
+ * variant: icon beside the copy, left aligned with the card's content edge.
+ */
+export function EmptyState({
+  icon,
+  title,
+  body,
+  action,
+  className,
+  compact,
+}: {
+  icon?: ReactNode;
+  title: string;
+  body?: string;
+  action?: ReactNode;
+  className?: string;
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <div className={cn("flex items-start gap-3 px-4 py-4", className)}>
+        {icon ? <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sunken text-muted [&_svg]:size-4">{icon}</div> : null}
+        <div className="min-w-0 flex-1 pt-0.5">
+          <p className="text-xs font-semibold text-ink">{title}</p>
+          {body ? <p className="mt-0.5 text-2xs text-muted">{body}</p> : null}
+          {action ? <div className="mt-2.5">{action}</div> : null}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={cn("flex flex-col items-center px-6 py-10 text-center", className)}>
       {icon ? <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-sunken text-muted [&_svg]:size-5">{icon}</div> : null}

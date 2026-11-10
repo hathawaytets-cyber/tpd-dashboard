@@ -21,7 +21,7 @@ export function SignInScreen() {
 
   return (
     <Page>
-      <div className="mx-auto mt-6 max-w-md rounded-xl border border-line bg-surface p-8 shadow-sm">
+      <div className="mx-auto mt-6 max-w-md rounded-xl border border-edge bg-surface p-8 shadow-card">
         <Badge size={56} className="mx-auto" />
         <h1 className="display mt-5 text-center text-xl font-bold">Sign in to Headquarters</h1>
         <p className="mt-2 text-center text-xs text-muted">

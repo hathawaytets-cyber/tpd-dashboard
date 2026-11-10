@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 import { AlertTriangle, BookOpen, Car, ExternalLink, History, Lock, MapPin, Play, RotateCw, ShieldCheck, Square } from "lucide-react";
 import { usePatrol } from "./patrol-provider";
-import { SessionDrawer, sessionStatus } from "./session-drawer";
+import { SessionDrawer, SessionStatusLabel, sessionStatus } from "./session-drawer";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Page, PageHeader } from "@/components/shell/page";
 import { ANCHORCAD_URL } from "@/components/shell/nav-config";
@@ -383,7 +383,7 @@ export function SessionHistory({ state }: { state: PreviewState }) {
       header: "Status",
       sort: (s) => sessionStatus(s).label,
       text: (s) => sessionStatus(s).label,
-      cell: (s) => <Pill tone={sessionStatus(s).tone}>{sessionStatus(s).label}</Pill>,
+      cell: (s) => <SessionStatusLabel session={s} />,
     },
     {
       key: "actions",

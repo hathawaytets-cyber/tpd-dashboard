@@ -16,7 +16,7 @@ export function ResourcesWorkspace() {
           { href: SOURCES.handbook.href, icon: FileText, title: "Personnel Policy & Procedures Handbook", meta: "Effective October 30, 2026 · approved by the Chief of Police" },
           { href: SOURCES.useOfForce.href, icon: Scale, title: "Use of Force Policy", meta: "Dated October 30, 2026 · Chief of Police" },
         ].map((d) => (
-          <a key={d.title} href={d.href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 rounded-xl border border-line bg-surface p-5 shadow-sm hover:border-line-strong">
+          <a key={d.title} href={d.href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 rounded-xl border border-edge bg-surface p-5 shadow-card hover:border-line-strong">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-obsidian text-gold">
               <d.icon className="size-5" aria-hidden />
             </span>

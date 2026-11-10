@@ -163,7 +163,7 @@ export function DivisionsOverview() {
           const mine = !!me?.member.divisions.includes(d.name);
           return (
             <li key={d.slug}>
-              <Link href={`/hq/divisions/${d.slug}`} className="flex h-full flex-col rounded-xl border border-line bg-surface p-5 shadow-sm transition-colors hover:border-line-strong">
+              <Link href={`/hq/divisions/${d.slug}`} className="flex h-full flex-col rounded-xl border border-edge bg-surface p-5 shadow-card transition-colors hover:border-line-strong">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-semibold">{d.name}</p>
                   <span className="shrink-0 rounded-full bg-obsidian px-2.5 py-0.5 text-3xs font-bold text-gold">{d.callsign ? `${d.callsign} · ${d.prefix}` : d.prefix}</span>
