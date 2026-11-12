@@ -152,3 +152,16 @@ test("live: a Captain sees compliance from dpe_compliance", async ({ page }) => 
   await expect(table.getByText("Approved leave of absence")).toBeVisible();
   expect(range).toMatchObject({ p_to: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), p_from: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) });
 });
+
+test("live: before the evaluation migration is applied, supervisors see a calm notice, not an error", async ({ page }) => {
+  await live(page, person("Sergeant", "Q. Sergeant", "X-450"), () => undefined);
+  // Registered after the catch-all, so it takes precedence.
+  await page.route("https://fakeproj.supabase.co/rest/v1/rpc/dpe_my_overview", (route) =>
+    route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ code: "PGRST202", message: "Could not find the function tpd.dpe_my_overview without parameters in the schema cache" }) }),
+  );
+  await page.goto("/hq/evaluations");
+  await expect(page.getByText("Not switched on yet", { exact: true })).toBeVisible();
+  await expect(page.getByText(/could not be loaded/)).toHaveCount(0);
+  await page.goto("/hq");
+  await expect(page.getByText(/schema cache/)).toHaveCount(0);
+});

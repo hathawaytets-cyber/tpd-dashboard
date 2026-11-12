@@ -4,6 +4,7 @@ import { supabase } from "@/lib/backend/client";
 import { DEFAULT_SETTINGS, type EvaluationSettings } from "./rules";
 import {
   EvaluationError,
+  NOT_ENABLED,
   type Award,
   type EligibleOfficer,
   type Entry,
@@ -25,7 +26,10 @@ function db() {
   return sb;
 }
 function fail(error: { message: string; code?: string } | null): never | void {
-  if (error) throw new EvaluationError(error.message, error.code);
+  if (!error) return;
+  // The site can go live before the evaluation migration is applied: PostgREST then reports the RPC or table as missing.
+  if (error.code === "PGRST202" || error.code === "PGRST205" || error.code === "42883" || error.code === "42P01") throw new EvaluationError(NOT_ENABLED, "not_enabled");
+  throw new EvaluationError(error.message, error.code);
 }
 const ms = (v: string | null | undefined) => (v ? Date.parse(v) : null);
 const hhmm = (t: string) => t.slice(0, 5);

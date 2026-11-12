@@ -11,6 +11,7 @@ import { Card, CardHeader } from "@/components/ui/surface";
 import { can } from "@/lib/authz";
 import { cn } from "@/lib/cn";
 import {
+  NOT_ENABLED,
   CATEGORIES,
   CATEGORY_LABEL,
   CATEGORY_SHORT,
@@ -74,7 +75,11 @@ export function DailyEvaluation() {
         title="Daily patrol evaluation"
         description="One report for each patrol day you are assigned or patrol. Record officers who exceeded expectations, need improvement or deserve an award, or confirm there was nothing notable."
       />
-      {error ? (
+      {error === NOT_ENABLED ? (
+        <Callout tone="info" title="Not switched on yet">
+          {error}
+        </Callout>
+      ) : error ? (
         <Callout tone="error" title="Your reporting status could not be loaded" action={<Button size="sm" variant="secondary" onClick={() => void reload()}>Retry</Button>}>
           {error}
         </Callout>

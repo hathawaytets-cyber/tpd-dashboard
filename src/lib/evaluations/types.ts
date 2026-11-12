@@ -187,6 +187,9 @@ export interface EvaluationsApi {
   supervisors(): Promise<PersonRef[]>;
 }
 
+/** Shown when the server does not have the evaluation tables and functions yet. */
+export const NOT_ENABLED = "Daily patrol evaluations are not switched on yet. Command will announce when reporting starts.";
+
 /** Errors carry a user-facing message; the code is the Postgres SQLSTATE when there is one. */
 export class EvaluationError extends Error {
   constructor(message: string, readonly code?: string) {
