@@ -112,3 +112,11 @@ None of these tests talks to the real Discord, Google, Supabase or AnchorCAD; th
 2. Redeploy `discord-verify`, `integration-health` (fix: command users were matched against the first personnel row instead of their own; authenticates before anything else) and `roster-sync` (truncation guard; dry run with the sync secret). Deploy the new code BEFORE turning Verify JWT OFF for `discord-verify` and `integration-health`: the new code authenticates first, the old `discord-verify` did not.
 3. Missing secrets: `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`, `ROSTER_SYNC_SECRET`. Then the scheduler SQL.
 4. Rebuild and deploy the site (needs approval).
+
+## Daily Patrol Evaluation activation (not applied; needs dede's approval)
+Nothing below has been run against the live project.
+1. Confirm the earlier migrations are applied on the live project, in filename order. The evaluation migration needs `tpd.personnel`, `tpd.audit_log`, `tpd.patrol_sessions`, `tpd.member_requests`, `tpd.is_command()` and `tpd.is_active_member()`. Check with `select to_regclass('tpd.patrol_sessions'), to_regclass('tpd.member_requests'), to_regprocedure('tpd.list_member_directory()');` and apply any that are missing first.
+2. Apply `supabase/migrations/20261112000000_daily_patrol_evaluations.sql` (tpd schema only; it does not touch `public` or any District Five table). It makes `tpd.audit_log` append-only.
+3. Have a Captain or above enter the official award list (Command Center → Evaluations → Awards and rules), or leave it empty so supervisors name awards in free text (PC-35).
+4. Assign patrol days to Sergeants and Lieutenants (Compliance → Assign patrol days). Optionally run `select tpd.dpe_refresh_obligations('<from>', '<to>');` as a Captain+ to create obligations from patrols already logged.
+5. Rebuild and deploy the site (needs approval). The settings stay labelled interim until leadership answers PC-30 to PC-38.

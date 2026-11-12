@@ -172,7 +172,7 @@ function RulesNote({ overview }: { overview: MyOverview }) {
         <li>Days you are assigned always need a report. Without an assignment, {s.minPatrolMinutes}+ minutes of completed patrol creates one.</li>
         <li>Approved leave and command-excused days never count as missing.</li>
         <li>Evaluations are confidential: only you and command staff can read them. Nothing is posted to Discord.</li>
-        <li>A “needs improvement” observation is not discipline. Only command can refer it onward (Handbook §13.1).</li>
+        <li>A “needs improvement” observation is not discipline. Formal discipline follows Handbook §13 and is never issued from this page.</li>
       </ul>
     </section>
   );
