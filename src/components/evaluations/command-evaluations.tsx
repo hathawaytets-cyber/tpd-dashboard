@@ -625,7 +625,7 @@ function ReportSheet({
       subtitle={d ? `${d.author.rank} ${d.author.name} · ${d.author.callsign ?? "—"}` : undefined}
       footer={
         d && !own ? (
-          <>
+          <div className="flex justify-end gap-2">
             <Button variant="secondary" size="sm" onClick={() => setAction({ stage: "reopen", decision: "reopened", officerId: null, label: "Reopen for amendment" })}>
               Reopen for amendment
             </Button>
@@ -634,13 +634,14 @@ function ReportSheet({
                 Mark reviewed
               </Button>
             ) : null}
-          </>
+          </div>
         ) : undefined
       }
     >
-      {error ? <Callout tone="error" title="The report could not be loaded">{error}</Callout> : null}
-      {!d && !error ? <Skeleton className="h-48 rounded-lg" /> : null}
-      {d ? (
+      <div className="p-5">
+        {error ? <Callout tone="error" title="The report could not be loaded">{error}</Callout> : null}
+        {!d && !error ? <Skeleton className="h-48 rounded-lg" /> : null}
+        {d ? (
         <div className="flex flex-col gap-5 text-xs">
           <div className="flex flex-wrap gap-1.5">
             <Pill tone={d.late ? "amber" : "green"} dotted>
@@ -757,7 +758,8 @@ function ReportSheet({
             </section>
           ) : null}
         </div>
-      ) : null}
+        ) : null}
+      </div>
       {action ? (
         <ReasonDialog
           title={action.label}
