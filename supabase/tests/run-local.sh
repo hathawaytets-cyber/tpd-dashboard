@@ -11,4 +11,4 @@ trap '"$bin/pg_ctl" -D "$data" -m immediate stop >/dev/null 2>&1 || true; rm -rf
 psql=(psql -X -q -h "$sock" -U postgres -d postgres -v ON_ERROR_STOP=1)
 "${psql[@]}" -f "$here/auth-stub.sql"
 for f in "$here"/../migrations/*.sql; do "${psql[@]}" -f "$f"; done
-"${psql[@]}" -At -f "$here/rls.test.sql"
+for t in "$here"/rls.test.sql "$here"/dpe.test.sql; do "${psql[@]}" -At -f "$t"; done

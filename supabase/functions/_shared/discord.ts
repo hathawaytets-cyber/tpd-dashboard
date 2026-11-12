@@ -19,7 +19,7 @@ export const ROLE_WRITES_ENABLED = false as const;
 export const SNOWFLAKE = /^\d{17,20}$/;
 export const USER_SCOPES = "identify guilds.members.read" as const;
 
-const headers = (token: string) => ({ authorization: `Bearer ${token}`, "user-agent": "TPD-HQ (https://github.com/dedeworld9-cmd/tpd-dashboard, 1.0)" });
+const headers = (token: string) => ({ authorization: `Bearer ${token}`, "user-agent": "TPD-HQ (https://github.com/hathawaytets-cyber/tpd-dashboard, 1.0)" });
 
 /** GET /users/@me with the member's token: proves whose token it is. */
 export async function tokenOwner(token: string, opts: RetryOptions = {}): Promise<{ id: string; username: string }> {

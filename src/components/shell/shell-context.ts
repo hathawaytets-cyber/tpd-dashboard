@@ -30,6 +30,7 @@ export const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ["G", "M"], label: "Go to Personnel" },
   { keys: ["G", "R"], label: "Go to Requests" },
   { keys: ["G", "C"], label: "Go to Command Center" },
+  { keys: ["G", "E"], label: "Go to Daily evaluation" },
   { keys: ["N"], label: "New request" },
   { keys: ["["], label: "Collapse or expand the sidebar" },
   { keys: ["?"], label: "Show keyboard shortcuts" },

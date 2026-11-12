@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 
-export type Role = "officer" | "probationary" | "supervisor" | "command";
+export type Role = "officer" | "probationary" | "supervisor" | "lieutenant" | "captain" | "command" | "chief";
 
 /** Loads HQ with fresh sample data as the given preview persona. */
 export async function asRole(page: Page, role: Role, path = "/hq") {
@@ -10,6 +10,7 @@ export async function asRole(page: Page, role: Role, path = "/hq") {
     localStorage.removeItem("tpd-preview-state");
     localStorage.removeItem("tpd-command-views");
     localStorage.removeItem("tpd-sidebar-collapsed");
+    localStorage.removeItem("tpd-dpe-preview");
   });
   await page.reload();
   await page.waitForFunction(() => localStorage.getItem("tpd-preview-state"));

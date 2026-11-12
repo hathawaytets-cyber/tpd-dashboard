@@ -63,3 +63,20 @@ Production build, headless Chromium. tsc and lint pass; build succeeds.
 Bugs found and fixed: dashboard table forced phones to zoom out (layout 491 px on a 412 px screen); patrol hero image reduced contrast behind actions; decision queue actions clipped at 1440 px.
 
 Limits: all data is the browser-local preview store. "Server-side" checks are the store's operation guards, which mirror the planned server contracts; they are not a server. Not yet tested: axe scan, screen readers, Safari and Firefox.
+
+## Daily Patrol Evaluation · 2026-11-12 · branch `claude/project-thread-5t5848`
+
+| Suite | Result |
+|-------|--------|
+| SQL (`supabase/tests/run-local.sh` on local PostgreSQL 16) | RLS suite passes again (was failing on `main`); new `dpe.test.sql` passes (15 sections) |
+| Vitest | 204 / 204 pass (adds 14 patrol-day, deadline, status and validation tests) |
+| Playwright (desktop 1440, Pixel 7) | 41 pass, 14 skipped (fake-backend only, as before); adds 8 evaluation tests and 1 mobile test |
+| `tsc --noEmit`, `npm run lint`, `npm run build` | Pass (lint: the 2 pre-existing warnings) |
+
+SQL coverage: patrol-day boundary at 04:00 and the 23 h / 25 h DST days; patrol obligations (cross-midnight, 03:50 start, under 15 minutes, summed short sessions, officer, captain, former member); assignments as the authoritative source and Sergeants unable to assign; status at the deadline; no-observations flow and validation; duplicate submit (23505); future days; amendments and version history; visibility for another Sergeant, a Lieutenant, an Officer, signed-out and anon users and command; excusals and approved LOA; assignment cancellation; concern referral; two-step award approval where the endorser cannot approve; lock after review and one amendment after reopen; append-only versions, reviews and audit log; history that survives roster changes; export and audited settings. Mutation checks (removing the duplicate guard, removing the excusal branch) make the suite fail.
+
+E2E coverage: two-action no-observations report; full report with three officers, validation messages and an award; duplicate submission from a second tab rejected; amendment needs a reason and keeps version 1; Lieutenant on leave sees excused days; Officers and Captain+ cannot file and Officers and Sergeants cannot open command review; command excuses an overdue day; award endorsement without final approval for a Major and a concern referral; phone submission and no horizontal overflow on the new pages.
+
+Bugs found by these tests and fixed: draft autosave disabled the officer search while saving, which closed the list mid-selection; the first draft save remounted the form (key included the report status), dropping focus and any edit made during the save.
+
+Not tested: real Supabase (migration not applied), true parallel submissions, screen readers, Safari and Firefox.

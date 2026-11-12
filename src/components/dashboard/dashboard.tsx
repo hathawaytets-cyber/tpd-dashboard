@@ -1,5 +1,6 @@
 "use client";
 
+import { EvaluationDueCard } from "@/components/evaluations/reminders";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -73,6 +74,7 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)] xl:gap-6">
         <div className="flex min-w-0 flex-col gap-5 xl:gap-6">
+          <EvaluationDueCard />
           {probationary ? <TrainingHero /> : <DutyHero state={state} now={now} />}
           {isCommand ? <CommandShortcut state={state} now={now} /> : null}
           <RecentPatrols state={state} />
