@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 
-export type Role = "officer" | "probationary" | "supervisor" | "lieutenant" | "command";
+export type Role = "officer" | "probationary" | "supervisor" | "lieutenant" | "captain" | "command" | "chief";
 
 /** Loads HQ with fresh sample data as the given preview persona. */
 export async function asRole(page: Page, role: Role, path = "/hq") {

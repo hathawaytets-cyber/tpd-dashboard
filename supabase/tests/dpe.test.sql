@@ -332,4 +332,13 @@ end $$;
 reset role;
 do $$ begin assert exists (select 1 from tpd.audit_log where action = 'dpe.exported'), 'export audited'; end $$;
 
+-- 16. Internal helpers are not callable through the API (they would reveal other members' leave reasons and patrol time).
+do $$ begin
+  if has_function_privilege('authenticated', 'tpd.dpe_excuse_reason(uuid, date)', 'execute') then raise exception 'FAIL: authenticated can call dpe_excuse_reason'; end if;
+  if has_function_privilege('authenticated', 'tpd.dpe_patrol_minutes(uuid, date)', 'execute') then raise exception 'FAIL: authenticated can call dpe_patrol_minutes'; end if;
+  if has_function_privilege('anon', 'tpd.dpe_save_report(date, text, boolean, jsonb, text)', 'execute') then raise exception 'FAIL: anon can call dpe_save_report'; end if;
+  if has_function_privilege('authenticated', 'tpd.dpe_ensure_obligation(uuid, date)', 'execute') then raise exception 'FAIL: authenticated can create obligations directly'; end if;
+  raise notice 'ok: internal helpers are private';
+end $$;
+
 select 'ALL DPE TESTS PASSED' as result;

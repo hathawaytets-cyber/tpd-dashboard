@@ -777,6 +777,10 @@ revoke all on function tpd.dpe_cfg(), tpd.dpe_patrol_date(timestamptz), tpd.dpe_
   tpd.dpe_me(), tpd.dpe_is_reporter(), tpd.dpe_is_reviewer(), tpd.dpe_is_award_authority(), tpd.dpe_patrol_minutes(uuid, date),
   tpd.dpe_excuse_reason(uuid, date), tpd.dpe_status_at(tpd.dpe_obligations, text, boolean, timestamptz), tpd.dpe_forbid_change(),
   tpd.dpe_after_patrol_end() from public, anon;
+-- Belt and braces: even if the target project grants routines to authenticated by default, these stay private
+-- (dpe_excuse_reason would otherwise reveal another member's leave or excusal reason).
+revoke all on function tpd.dpe_cfg(), tpd.dpe_patrol_minutes(uuid, date), tpd.dpe_excuse_reason(uuid, date),
+  tpd.dpe_status_at(tpd.dpe_obligations, text, boolean, timestamptz), tpd.dpe_forbid_change(), tpd.dpe_after_patrol_end() from authenticated;
 grant execute on function tpd.dpe_patrol_date(timestamptz), tpd.dpe_day_start(date), tpd.dpe_day_end(date), tpd.dpe_deadline(date),
   tpd.dpe_is_reporter(), tpd.dpe_is_reviewer(), tpd.dpe_is_award_authority() to authenticated;
 -- RLS policies call these as the signed-in role.
