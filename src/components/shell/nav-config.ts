@@ -2,6 +2,7 @@ import {
   Activity,
   BookOpen,
   Building2,
+  ClipboardCheck,
   ClipboardList,
   Gauge,
   GraduationCap,
@@ -59,8 +60,19 @@ export const NAV: NavGroup[] = [
   {
     label: "Management",
     items: [
+      { href: "/hq/evaluations", label: "Daily evaluation", icon: ClipboardCheck, capability: "evaluation.submit", shortcut: "G E" },
       { href: "/hq/supervisor", label: "Supervisor", icon: ShieldCheck, capability: "supervisor.view" },
-      { href: "/hq/command", label: "Command Center", icon: Gauge, capability: "command.view", shortcut: "G C", children: [{ href: "/hq/command/integrations", label: "Integrations" }] },
+      {
+        href: "/hq/command",
+        label: "Command Center",
+        icon: Gauge,
+        capability: "command.view",
+        shortcut: "G C",
+        children: [
+          { href: "/hq/command/evaluations", label: "Evaluations" },
+          { href: "/hq/command/integrations", label: "Integrations" },
+        ],
+      },
     ],
   },
 ];
@@ -78,7 +90,7 @@ export const PAGES: { href: string; label: string; parent?: string; capability?:
   ...FOOTER_NAV.map((i) => ({ href: i.href, label: i.label })),
 ];
 
-export const GO_TO: Record<string, string> = { o: "/hq", p: "/hq/patrol", a: "/hq/activity", t: "/hq/training", m: "/hq/roster", s: "/hq/structure", r: "/hq/requests", c: "/hq/command" };
+export const GO_TO: Record<string, string> = { o: "/hq", p: "/hq/patrol", a: "/hq/activity", t: "/hq/training", m: "/hq/roster", s: "/hq/structure", r: "/hq/requests", c: "/hq/command", e: "/hq/evaluations" };
 
 /** AnchorCAD is the department's official reporting system (HB §10). No API integration exists. */
 export const ANCHORCAD_PANEL = checkPanelUrl(process.env.NEXT_PUBLIC_ANCHORCAD_URL);

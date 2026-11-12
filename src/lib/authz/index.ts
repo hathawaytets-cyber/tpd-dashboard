@@ -50,7 +50,10 @@ export type Capability =
   | "personnel.manage"
   | "discipline.report"
   | "discipline.issue"
-  | "training.approve_independent";
+  | "training.approve_independent"
+  | "evaluation.submit"
+  | "evaluation.review"
+  | "evaluation.award_final";
 
 /** Lower index = more senior. Reserve Officer sits outside the seniority ladder (PC-13). */
 export function seniority(rank: Rank): number {
@@ -91,6 +94,12 @@ const RULES: Record<Capability, (a: Actor) => boolean> = {
   "discipline.issue": (a) => atLeast(a.rank, "Lieutenant"),
   // HB §3.1: OOTC approves independent patrol.
   "training.approve_independent": (a) => OOTC.includes(a.rank),
+  // INTERIM (PC-31): Sergeants and Lieutenants file one Daily Patrol Evaluation per assigned patrol day.
+  "evaluation.submit": (a) => a.rank === "Sergeant" || a.rank === "Lieutenant",
+  // INTERIM (PC-34, follows PC-08): Captain and above review evaluations, compliance and award endorsements.
+  "evaluation.review": (a) => atLeast(a.rank, "Captain"),
+  // INTERIM (PC-35): the Office of the Chiefs gives final award approval.
+  "evaluation.award_final": (a) => OOTC.includes(a.rank),
 };
 
 /** Human-readable access rule, kept beside RULES so the UI never restates it. */
@@ -98,6 +107,9 @@ export const ACCESS_NOTE: Partial<Record<Capability, string>> = {
   "command.view": "Captain and above (interim rule pending leadership, PC-08)",
   "supervisor.view": "Sergeant and above",
   "personnel.manage": "Captain and above (interim)",
+  "evaluation.submit": "Sergeants and Lieutenants (interim rule pending leadership, PC-31)",
+  "evaluation.review": "Captain and above (interim rule pending leadership, PC-34)",
+  "evaluation.award_final": "Office of the Chiefs (interim rule pending leadership, PC-35)",
 };
 
 export function can(actor: Actor | null | undefined, capability: Capability): boolean {

@@ -24,6 +24,7 @@ import { Badge, Avatar, RankMark } from "@/components/ui/identity";
 import { MenuItem, MenuLabel, MenuSeparator, Popover, Tooltip } from "@/components/ui/menu";
 import { Dot } from "@/components/ui/status";
 import { Skeleton, toast } from "@/components/ui/feedback";
+import { EvaluationNavBadge } from "@/components/evaluations/reminders";
 import { usePatrol } from "@/components/patrol/patrol-provider";
 import { can } from "@/lib/authz";
 import { useAuth, useIsLive } from "@/lib/backend/auth";
@@ -228,7 +229,8 @@ function NavItem({ item, pathname, collapsed, onNavigate }: { item: NavLeaf; pat
       {active ? <span aria-hidden className="absolute -left-2.5 top-2 bottom-2 w-[3px] rounded-r-full bg-gold" /> : null}
       {Icon ? <Icon aria-hidden className={cn("size-[17px] shrink-0", active ? "text-gold" : "")} /> : null}
       {collapsed ? null : <span className="truncate">{item.label}</span>}
-      {!collapsed && item.shortcut ? (
+      {item.href === "/hq/evaluations" ? <EvaluationNavBadge collapsed={collapsed} /> : null}
+      {!collapsed && item.shortcut && item.href !== "/hq/evaluations" ? (
         <span className="ml-auto hidden text-3xs tracking-wider text-on-dark-muted/60 opacity-0 transition-opacity group-hover:opacity-100 xl:inline">{item.shortcut}</span>
       ) : null}
     </Link>

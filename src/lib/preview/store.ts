@@ -16,12 +16,13 @@ import { can, canDecide, type Actor, type RequestType } from "@/lib/authz";
 import { STALE_SESSION_MS } from "@/lib/domain/activity";
 import { MEMBERS, RANKS, type District, type Member, type RequestState } from "@/lib/sample-data";
 
-export type PreviewRole = "officer" | "probationary" | "supervisor" | "command";
+export type PreviewRole = "officer" | "probationary" | "supervisor" | "lieutenant" | "command";
 
 export const ROLE_PERSONA: Record<PreviewRole, { memberId: string; label: string; description: string }> = {
   officer: { memberId: "m-07", label: "Officer", description: "Senior Officer, North District" },
   probationary: { memberId: "m-10", label: "Probationary officer", description: "In field training with a PTO" },
   supervisor: { memberId: "m-06", label: "Supervisor", description: "Sergeant, North District" },
+  lieutenant: { memberId: "m-05", label: "Lieutenant", description: "Lieutenant, North District (on approved leave)" },
   command: { memberId: "m-03", label: "Command", description: "Major, Patrol Operations" },
 };
 
@@ -286,6 +287,9 @@ export function getPreviewState(): PreviewState {
 
 export function resetPreview() {
   if (live) return;
+  try {
+    localStorage.removeItem("tpd-dpe-preview"); // the evaluations preview reseeds from the fresh sample state
+  } catch {}
   state = seed(Date.now());
   persist();
   listeners.forEach((l) => l());

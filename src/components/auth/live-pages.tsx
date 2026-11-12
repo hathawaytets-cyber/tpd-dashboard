@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Users } from "lucide-react";
+import { EvaluationDueCard } from "@/components/evaluations/reminders";
 import { VerifiedIdentity } from "@/components/auth/verified-identity";
 import { Page, PageHeader } from "@/components/shell/page";
 import { ButtonLink } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export function LiveOverview() {
       <PageHeader eyebrow={new Date().toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })} title={`${greeting()}, ${me.name}`} description={`${me.rank}${me.callsign ? ` · ${me.callsign}` : ""}${me.district ? ` · ${me.district} District` : ""}`} />
       <div className="space-y-5">
         <VerifiedIdentity />
+        <EvaluationDueCard />
         <Callout tone="info" title="Training sign-offs are now recorded">
           Patrol, Activity, Requests and Training sign-offs use server-side records. Independent-patrol clearance remains a separate Office of the Chiefs decision.
         </Callout>

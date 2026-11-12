@@ -15,6 +15,7 @@ import { cn } from "@/lib/cn";
 import { formatClock } from "@/lib/domain/activity";
 import { useIsLive } from "@/lib/backend/auth";
 import { useMe, useNow } from "@/lib/preview/hooks";
+import { useDutyNotifications } from "@/components/evaluations/reminders";
 import { markNotificationsRead, memberById, notificationsFor, usePreviewState } from "@/lib/preview/store";
 import { ANCHORCAD_URL, PAGES } from "./nav-config";
 import { useShell } from "./shell-context";
@@ -221,7 +222,8 @@ function Notifications() {
   const state = usePreviewState();
   const router = useRouter();
   const now = useNow(60_000);
-  const items = useMemo(() => (state ? notificationsFor(state) : []), [state]);
+  const duties = useDutyNotifications();
+  const items = useMemo(() => [...duties, ...(state ? notificationsFor(state) : [])].sort((a, b) => b.at - a.at), [state, duties]);
   const unread = state ? items.filter((n) => !state.readNotifications.includes(n.id)) : [];
 
   return (
