@@ -61,10 +61,10 @@ server-side check; signed-in users have no write grants on any table.
 | # | Item | Where |
 |---|------|-------|
 | 1 | Create a Supabase project. Run `supabase link`, `supabase db push` (migrations), then `supabase functions deploy roster-sync discord-verify integration-health`. | supabase.com |
-| 2 | Create a Discord application. Add the redirect `https://<project-ref>.supabase.co/auth/v1/callback`. In Supabase Auth → Providers → Discord, paste the client ID and secret. In Auth → URL configuration, add `https://dedeworld9-cmd.github.io/tpd-dashboard/hq/auth/callback/` to the redirect allow list. | discord.com/developers, Supabase |
+| 2 | Create a Discord application. Add the redirect `https://<project-ref>.supabase.co/auth/v1/callback`. In Supabase Auth → Providers → Discord, paste the client ID and secret. In Auth → URL configuration, add `https://hathawaytets-cyber.github.io/tpd-dashboard/hq/auth/callback/` to the redirect allow list. | discord.com/developers, Supabase |
 | 3 | Set `DISCORD_GUILD_ID` (the TPD server ID) as a function secret. No bot is needed. | Supabase |
 | 4 | Create a Google Cloud service account with the Sheets API enabled. Share the roster sheet with its email as **Viewer**. Set `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS` (the JSON) and `GOOGLE_SHEETS_ID`. | Google Cloud |
-| 5 | Set `ROSTER_SYNC_SECRET` and `ALLOWED_ORIGINS=https://dedeworld9-cmd.github.io`. Then run `supabase/sql/schedule-roster-sync.sql`. | Supabase |
+| 5 | Set `ROSTER_SYNC_SECRET` and `ALLOWED_ORIGINS=https://hathawaytets-cyber.github.io`. Then run `supabase/sql/schedule-roster-sync.sql`. | Supabase |
 | 6 | Optional: create an AnchorCAD API key with `server:read` only (Dashboard → Config → Developer API). Set `ANCHORCAD_API_KEY` and `ANCHORCAD_PANEL_URL`. | AnchorCAD |
 | 7 | Build the site with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `NEXT_PUBLIC_ANCHORCAD_URL`. All three are public by design. Deploying needs dede's approval. | build env |
 | 8 | First run: a Captain+ member signs in. Then open Command Center → Integrations, click **Run health checks**, then **Preview sync**, then **Apply**. | the site |

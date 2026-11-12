@@ -1,0 +1,69 @@
+name: Publish TPD Headquarters to GitHub Pages
+
+# Manual only. A deploy needs dede's explicit approval, so nothing here runs on push or merge.
+# Run it from Actions → "Publish TPD Headquarters to GitHub Pages" → Run workflow.
+# One-time setup: Settings → Pages → Build and deployment → Source "Deploy from a branch", branch gh-pages, folder / (root).
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit to publish
+        required: true
+        default: main
+      confirm:
+        description: Type PUBLISH to confirm this is an approved production deploy
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tpd-gh-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.confirm == 'PUBLISH' }}
+    steps:
+      - name: Check out the approved build
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Verify
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+      - name: Export the website
+        env:
+          STATIC_EXPORT: '1'
+          # Pages serves https://<owner>.github.io/<repo>/, so the base path is the repository name.
+          PAGES_BASE_PATH: /${{ github.event.repository.name }}
+          # Public by design (row-level security decides access). Without both, sign-in is switched off.
+          NEXT_PUBLIC_SUPABASE_URL: https://ajequjidyrsitqmcqkwr.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_E-u-OZaCNA6i3GACXBfueA_tQmIGs46
+        run: npm run build
+      - name: Publish to the gh-pages branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -f out/index.html
+          cd out
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git commit -q -m "Publish TPD Headquarters from ${{ inputs.ref }}"
+          header=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w 0)
+          git -c "http.extraheader=AUTHORIZATION: basic $header" push --force "https://github.com/${GITHUB_REPOSITORY}.git" HEAD:gh-pages
+      - name: Site address
+        run: echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
