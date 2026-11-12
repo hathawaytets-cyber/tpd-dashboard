@@ -127,6 +127,6 @@ Done
 - `lib/authz`: `evaluation.submit` (Sergeant, Lieutenant), `evaluation.review` (Captain+), `evaluation.award_final` (Office of the Chiefs). The server enforces the same rules independently.
 
 Limits
-- Live mode has no patrol logging yet, so live obligations come from command assignments until the patrol workspace is connected.
+- Patrol-based obligations depend on the live patrol workspace (`patrol_sessions`) being applied; command assignments work without it.
 - Concurrency is tested with sequential duplicate submissions and row locks, not true parallel sessions (no dblink locally).
 - Nothing is posted to Discord; notifications stay inside HQ.
