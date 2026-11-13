@@ -87,12 +87,14 @@ export default function HomePage() {
               Start your application <ArrowUpRight aria-hidden className="size-4" />
             </a>
           </div>
-          <ol className="relative grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ol className="grid grid-cols-1 gap-x-10 self-start border-b border-line sm:grid-flow-col sm:grid-cols-2 sm:grid-rows-4">
             {PATHWAY.map((step, i) => (
-              <li key={step.title} className={cn("relative rounded-lg border p-5", i === PATHWAY.length - 1 ? "border-obsidian bg-obsidian text-on-dark" : "border-line bg-surface")}>
-                <span className={cn("display text-2xl font-bold tabular", i === PATHWAY.length - 1 ? "text-gold" : "text-gold-ink")}>{String(i + 1).padStart(2, "0")}</span>
-                <p className="mt-2 text-sm font-semibold">{step.title}</p>
-                <p className={cn("mt-1 text-xs leading-relaxed", i === PATHWAY.length - 1 ? "text-on-dark-muted" : "text-muted")}>{step.detail}</p>
+              <li key={step.title} className="grid grid-cols-[2rem_1fr] gap-x-3 border-t border-line py-4">
+                <span className="pt-px text-xs font-semibold text-gold-ink tabular">{String(i + 1).padStart(2, "0")}</span>
+                <span>
+                  <span className="block text-sm font-semibold">{step.title}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted">{step.detail}</span>
+                </span>
               </li>
             ))}
           </ol>
