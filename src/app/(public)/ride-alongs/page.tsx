@@ -8,7 +8,7 @@ export const metadata:Metadata={title:"Civilian Ride-Alongs | TPD Roleplay",desc
 
 export default function RideAlongPage(){
  return <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-20">
-  <p className="text-xs font-semibold uppercase tracking-widest text-gold-ink">Civilian Observer Program · Florida State Roleplay</p>
+  <p className="text-2xs font-semibold text-gold-ink">Civilian observer program</p>
   <h1 className="display-x mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Civilian ride-alongs</h1>
   <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-2">Apply to accompany an available Tampa Police Department roleplay officer on a patrol. Applications are submitted and reviewed in the department Discord ticket system, not on this website.</p>
   <div className="mt-7 flex flex-wrap gap-3">

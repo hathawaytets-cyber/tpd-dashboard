@@ -61,7 +61,7 @@ export function Sidebar({ collapsed, onNavigate }: { collapsed: boolean; onNavig
               {collapsed ? (
                 <div aria-hidden className="mx-2 mb-2 h-px bg-dark-line" />
               ) : (
-                <p className="px-2.5 pb-1.5 text-3xs font-semibold tracking-wide text-on-dark-muted/80 uppercase">{group.label}</p>
+                <p className="px-2.5 pb-1.5 text-3xs font-semibold text-on-dark-muted/80">{group.label}</p>
               )}
               <ul className="flex flex-col gap-0.5">
                 {items.map((item) => (

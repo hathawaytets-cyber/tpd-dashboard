@@ -31,7 +31,7 @@ export default function HomePage() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,var(--obsidian)_22%,color-mix(in_srgb,var(--obsidian)_70%,transparent)_52%,color-mix(in_srgb,var(--obsidian)_15%,transparent)),linear-gradient(0deg,var(--obsidian),transparent_35%)]" />
         <div className="mx-auto max-w-7xl px-4 pt-16 pb-20 sm:px-6 md:pt-24 md:pb-28 lg:px-8">
           <Badge size={92} priority className="drop-shadow-[0_8px_24px_rgb(0_0_0/0.6)]" />
-          <p className="mt-7 text-2xs font-semibold tracking-[0.2em] text-gold uppercase">Florida State Roleplay</p>
+          <p className="mt-7 text-xs font-semibold text-gold">Florida State Roleplay</p>
           <h1 id="hero-h" className="display-x mt-3 max-w-3xl text-[clamp(2.6rem,7vw,5.25rem)] leading-[0.95] font-bold tracking-tight">
             Tampa Police Department
           </h1>
