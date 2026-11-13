@@ -27,9 +27,9 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section aria-labelledby="hero-h" className="relative isolate overflow-hidden bg-obsidian text-on-dark">
-        <Image src="/brand/charger-hero.webp" alt="" fill priority sizes="100vw" className="-z-20 object-cover object-[70%_55%]" />
-        <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,var(--obsidian)_22%,color-mix(in_srgb,var(--obsidian)_70%,transparent)_52%,color-mix(in_srgb,var(--obsidian)_15%,transparent)),linear-gradient(0deg,var(--obsidian),transparent_35%)]" />
-        <div className="mx-auto max-w-7xl px-4 pt-16 pb-20 sm:px-6 md:pt-24 md:pb-28 lg:px-8">
+        <Image src="/brand/charger-hero.webp" alt="" fill priority sizes="100vw" className="-z-20 hidden object-cover object-[70%_55%] md:block" />
+        <div aria-hidden className="absolute inset-0 -z-10 hidden md:block md:bg-[linear-gradient(90deg,var(--obsidian)_22%,color-mix(in_srgb,var(--obsidian)_70%,transparent)_52%,color-mix(in_srgb,var(--obsidian)_15%,transparent)),linear-gradient(0deg,var(--obsidian),transparent_35%)]" />
+        <div className="mx-auto max-w-7xl px-4 pt-16 pb-6 sm:px-6 md:pt-24 md:pb-28 lg:px-8">
           <Badge size={92} priority className="drop-shadow-[0_8px_24px_rgb(0_0_0/0.6)]" />
           <p className="mt-7 text-xs font-semibold text-gold">Florida State Roleplay</p>
           <h1 id="hero-h" className="display-x mt-3 max-w-3xl text-[clamp(2.6rem,7vw,5.25rem)] leading-[0.95] font-bold tracking-tight">
@@ -46,6 +46,11 @@ export default function HomePage() {
               Member portal
             </ButtonLink>
           </div>
+        </div>
+        {/* Phones: the car gets its own band under the copy, so the headline never sits on its lettering. */}
+        <div aria-hidden className="relative aspect-[16/10] md:hidden">
+          <Image src="/brand/charger-hero.webp" alt="" fill sizes="100vw" className="object-cover object-[62%_55%]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--obsidian),transparent_30%,transparent_75%,var(--obsidian))]" />
         </div>
       </section>
 
@@ -131,16 +136,13 @@ export default function HomePage() {
             {DISTRICTS.map((d) => {
               const cpt = positionByCallsign(d.captain);
               return (
-                <div key={d.name} className="group relative overflow-hidden rounded-xl border border-line bg-surface p-7 shadow-sm">
-                  <span aria-hidden className="display-x pointer-events-none absolute -right-2 -bottom-6 text-[120px] leading-none font-bold text-sunken select-none">
-                    {d.name[0]}
-                  </span>
+                <div key={d.name} className="rounded-xl border border-line bg-surface p-7 shadow-sm">
                   <Radio className="size-5 text-gold-ink" aria-hidden />
                   <p className="display mt-4 text-xl font-bold">{d.name} District</p>
                   <p className="mt-1 text-xs text-muted">
                     Call signs <span className="font-semibold text-ink tabular">{d.callsignRange}</span>
                   </p>
-                  <dl className="relative mt-6 grid grid-cols-2 gap-3 text-xs">
+                  <dl className="mt-6 grid grid-cols-2 gap-3 text-xs">
                     <div>
                       <dt className="text-3xs text-muted">District captain</dt>
                       <dd className="font-semibold">{cpt?.holder ?? "Vacant"}</dd>
