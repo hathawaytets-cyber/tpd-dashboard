@@ -202,34 +202,46 @@ export default function HomePage() {
             Leadership
           </h2>
           <p className="mt-3 max-w-2xl text-sm text-ink-2">
-            The department is led by the Office of the Chiefs. Positions are shown as listed on the official roster (checked {VERIFIED_ON}); unfilled positions are marked vacant.
+            The department is led by the Office of the Chiefs. Appointments are shown as listed on the official roster (checked {VERIFIED_ON}), with open positions counted under each group.
           </p>
-          <ol className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {LEADERSHIP.map((g) => (
-              <li key={g.tier} className={cn("rounded-xl p-5", g.stars === 4 ? "bg-obsidian text-on-dark md:col-span-2" : "border border-line bg-surface")}>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold">{g.tier}</p>
-                  <span aria-label={`${g.stars} star tier`} className="flex gap-0.5">
-                    {Array.from({ length: g.stars }, (_, i) => (
-                      <Star key={i} aria-hidden strokeWidth={0} className={cn("size-3 fill-current", g.stars === 4 ? "text-gold" : "text-gold-ink")} />
-                    ))}
-                  </span>
-                </div>
-                <ul className={cn("mt-3 grid grid-cols-1 gap-x-6 gap-y-2.5", g.stars === 4 && "sm:grid-cols-2 lg:grid-cols-4")}>
-                  {g.rows.map((x, i) => (
-                    <li key={`${x.callsign}-${i}`} className="flex items-baseline justify-between gap-3 text-xs">
-                      <span className="min-w-0">
-                        <span className={cn("block truncate font-semibold", !x.holder && (g.stars === 4 ? "text-on-dark-muted" : "text-muted"))}>{x.holder ?? "Vacant"}</span>
-                        <span className={cn("block truncate text-3xs", g.stars === 4 ? "text-on-dark-muted" : "text-muted")}>
-                          {x.rank} · {x.appointment}
-                        </span>
-                      </span>
-                      <span className={cn("shrink-0 text-3xs font-semibold tabular", g.stars === 4 ? "text-gold" : "text-gold-ink")}>{x.callsign ?? "—"}</span>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
+          <ol className="mt-8 grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+            {LEADERSHIP.map((g) => {
+              const held = g.rows.filter((x) => x.holder);
+              const open = g.rows.length - held.length;
+              const dark = g.stars === 4;
+              return (
+                <li key={g.tier} className={cn("flex flex-col rounded-xl p-5", dark ? "bg-obsidian text-on-dark md:col-span-3" : "border border-line bg-surface")}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold">{g.tier}</p>
+                    <span aria-label={`${g.stars} star tier`} className="flex gap-0.5">
+                      {Array.from({ length: g.stars }, (_, i) => (
+                        <Star key={i} aria-hidden strokeWidth={0} className={cn("size-3 fill-current", dark ? "text-gold" : "text-gold-ink")} />
+                      ))}
+                    </span>
+                  </div>
+                  {held.length > 0 ? (
+                    <ul className={cn("mt-3 grid grid-cols-1 gap-x-6 gap-y-2.5", dark && "sm:grid-cols-2 lg:grid-cols-4")}>
+                      {held.map((x, i) => (
+                        <li key={`${x.callsign}-${i}`} className="flex items-baseline justify-between gap-3 text-xs">
+                          <span className="min-w-0">
+                            <span className="block truncate font-semibold">{x.holder}</span>
+                            <span className={cn("block truncate text-3xs", dark ? "text-on-dark-muted" : "text-muted")}>
+                              {x.rank} · {x.appointment}
+                            </span>
+                          </span>
+                          <span className={cn("shrink-0 text-3xs font-semibold tabular", dark ? "text-gold" : "text-gold-ink")}>{x.callsign ?? "—"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {open > 0 ? (
+                    <p className={cn("text-3xs text-muted", held.length > 0 ? "mt-4 border-t border-line pt-3" : "mt-3")}>
+                      {held.length > 0 ? `${open} more ${open === 1 ? "position" : "positions"} open` : `${open} positions open, none appointed yet`}
+                    </p>
+                  ) : null}
+                </li>
+              );
+            })}
           </ol>
           <p className="mt-4 text-2xs text-muted">
             {POSITIONS.length - STAFF.vacant - LEADERSHIP.reduce((n, g) => n + g.rows.filter((x) => x.holder).length, 0)} further members serve in the North and South district patrol blocks.{" "}
@@ -309,10 +321,14 @@ function Service({ icon: Icon, title, body, cta }: { icon: typeof Car; title: st
       <Icon className="size-5 text-gold-ink" aria-hidden />
       <p className="mt-4 text-sm font-semibold">{title}</p>
       <p className="mt-1.5 text-xs leading-relaxed text-muted">{body}</p>
-      {cta ? (
-        <a href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noopener noreferrer" : undefined} className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold-ink hover:underline">
-          {cta.label} {cta.external ? <ArrowUpRight className="size-3.5" aria-hidden /> : null}
+      {cta?.external ? (
+        <a href={cta.href} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold-ink hover:underline">
+          {cta.label} <ArrowUpRight className="size-3.5" aria-hidden />
         </a>
+      ) : cta ? (
+        <Link href={cta.href} className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold-ink hover:underline">
+          {cta.label}
+        </Link>
       ) : null}
     </li>
   );
