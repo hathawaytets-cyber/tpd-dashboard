@@ -22,9 +22,9 @@ import { useMe, useNow } from "@/lib/preview/hooks";
 import { memberById, usePreviewState } from "@/lib/preview/store";
 import { DIVISIONS } from "@/lib/sample-data";
 
-const BAND: Record<Band, { label: string; tone: "green" | "neutral" | "amber" | "gold" }> = {
+const BAND: Record<Band, { label: string; tone: "green" | "quiet" | "amber" | "gold" }> = {
   met: { label: "Met", tone: "green" },
-  "on-track": { label: "On track", tone: "neutral" },
+  "on-track": { label: "On track", tone: "quiet" },
   "at-risk": { label: "Below half", tone: "amber" },
   exempt: { label: "Exempt", tone: "gold" },
 };

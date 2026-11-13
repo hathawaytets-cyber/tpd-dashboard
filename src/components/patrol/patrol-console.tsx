@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
-import { AlertTriangle, BookOpen, Car, ExternalLink, History, Lock, MapPin, Play, RotateCw, ShieldCheck, Square } from "lucide-react";
+import { AlertTriangle, BookOpen, Car, Check, ExternalLink, History, Lock, MapPin, Play, RotateCw, ShieldCheck, Square } from "lucide-react";
 import { usePatrol } from "./patrol-provider";
 import { SessionDrawer, sessionStatus } from "./session-drawer";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -563,7 +563,11 @@ export function Fleet() {
                 <p className="truncate text-3xs text-muted">In game: {v.model}</p>
                 <p className="truncate text-3xs text-muted">{v.use}</p>
               </div>
-              {ok ? <Pill tone="green">Authorized</Pill> : <span className="text-3xs whitespace-nowrap text-muted">{v.minRank}+</span>}
+              {ok ? (
+                <span className="inline-flex items-center gap-1 text-3xs font-medium whitespace-nowrap text-muted">
+                  <Check className="size-3 text-green" aria-hidden /> Authorized
+                </span>
+              ) : <span className="text-3xs whitespace-nowrap text-muted">{v.minRank}+</span>}
             </li>
           );
         })}
