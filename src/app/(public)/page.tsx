@@ -1,7 +1,7 @@
 import { ANNOUNCEMENTS } from "@/lib/announcements";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Car, FileText, Megaphone, Radio, Scale, Star, UserPlus } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Car, FileText, Megaphone, Radio, Scale, Star, UserPlus, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/identity";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -246,9 +246,10 @@ export default function HomePage() {
           <h2 id="svc-h" className="display text-3xl font-bold tracking-tight">
             Services
           </h2>
-          <ul className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <ul className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Service icon={UserPlus} title="Join the department" body="Apply through the recruitment application. Every submission is reviewed by the recruitment team." cta={{ href: APPLICATION_URL, label: "Apply", external: true }} />
             <Service icon={Car} title="Ride-along program" body="Make a copy of the civilian application, open a ticket in TPD Discord, and await a supervisory decision (Handbook §12.1)." cta={{ href: "/ride-alongs", label: "How to apply" }} />
+            <Service icon={ShieldAlert} title="Report an officer" body="File a complaint with Internal Affairs. No sign-in needed, anonymous reports accepted, and every complaint is reviewed." cta={{ href: "/report", label: "Report an officer" }} />
             <Service icon={Megaphone} title="Public communications" body="Official announcements and press releases come only from the Office of Public Affairs (Handbook §14.1)." />
           </ul>
         </div>
@@ -310,9 +311,16 @@ function Service({ icon: Icon, title, body, cta }: { icon: typeof Car; title: st
       <p className="mt-4 text-sm font-semibold">{title}</p>
       <p className="mt-1.5 text-xs leading-relaxed text-muted">{body}</p>
       {cta ? (
-        <a href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noopener noreferrer" : undefined} className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold-ink hover:underline">
-          {cta.label} {cta.external ? <ArrowUpRight className="size-3.5" aria-hidden /> : null}
-        </a>
+        cta.external ? (
+          <a href={cta.href} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold-ink hover:underline">
+            {cta.label} <ArrowUpRight className="size-3.5" aria-hidden />
+          </a>
+        ) : (
+          // Internal routes go through Link so the GitHub Pages base path is applied.
+          <Link href={cta.href} className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-gold-ink hover:underline">
+            {cta.label}
+          </Link>
+        )
       ) : null}
     </li>
   );

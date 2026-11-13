@@ -31,6 +31,7 @@ import { cn } from "@/lib/cn";
 import { formatClock } from "@/lib/domain/activity";
 import { useMe, useNow } from "@/lib/preview/hooks";
 import { resetPreview, ROLE_PERSONA, setRole, type PreviewRole } from "@/lib/preview/store";
+import { useIaAccess } from "@/components/ia/use-ia";
 import { FOOTER_NAV, NAV, type NavLeaf } from "./nav-config";
 import { useShell } from "./shell-context";
 import { setTheme, useTheme } from "./theme";
@@ -44,6 +45,7 @@ export function Sidebar({ collapsed, onNavigate }: { collapsed: boolean; onNavig
   const { toggleCollapsed } = useShell();
   const me = useMe();
   const pathname = usePathname();
+  const iaAccess = !!useIaAccess().access?.has_access;
 
   return (
     <div className="flex h-full flex-col bg-obsidian text-on-dark">
@@ -53,7 +55,7 @@ export function Sidebar({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       <nav aria-label="Headquarters" className="scrollbar-thin flex-1 overflow-y-auto px-2.5 pb-3">
         {NAV.map((group) => {
-          const items = group.items.filter((i) => !i.capability || (me && can(me.actor, i.capability)));
+          const items = group.items.filter((i) => (i.gate !== "ia" || iaAccess) && (!i.capability || (me && can(me.actor, i.capability))));
           if (!items.length) return null;
           return (
             <div key={group.label} className="mt-4 first:mt-1">

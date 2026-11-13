@@ -37,6 +37,11 @@ export function PublicMobileMenu() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/report" onClick={() => setOpen(false)} className="block rounded-md px-3 py-3 text-base text-on-dark hover:bg-white/6">
+                Report an officer
+              </Link>
+            </li>
             <li className="mt-1 border-t border-dark-line pt-1">
               <Link href="/hq" onClick={() => setOpen(false)} className="block rounded-md px-3 py-3 text-base font-semibold text-gold hover:bg-white/6">
                 Member portal
