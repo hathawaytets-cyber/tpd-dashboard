@@ -242,7 +242,6 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
           <>
             <Pill tone="neutral">Department-wide</Pill>
             <Pill tone="neutral">Updated {formatTime(now)}</Pill>
-            <Pill tone="amber">Access: {ACCESS_NOTE["command.view"]}</Pill>
           </>
         }
         actions={
@@ -499,7 +498,7 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
             </>
           }
         />
-        <p className="border-t border-line px-4 py-2.5 text-3xs text-muted">Bulk approval is intentionally unavailable: every decision needs its own recorded reason.</p>
+        <p className="border-t border-line px-4 py-2.5 text-3xs text-muted">Each request is decided on its own, with a recorded reason.</p>
       </Card>
 
       <DecisionSheet request={active} state={state} onClose={closeSheet} />
@@ -690,7 +689,7 @@ function AccessDenied({ rank }: { rank: string }) {
         </span>
         <h1 className="display mt-4 text-xl font-bold">Command Center is restricted</h1>
         <p className="mt-2 text-xs text-muted">
-          Access: {ACCESS_NOTE["command.view"]}. Your rank is {rank}. Access is checked on every operation; hiding the link is not the check.
+          Open to {ACCESS_NOTE["command.view"]}. Your rank is {rank}.
         </p>
         <div className="mt-5 flex justify-center gap-2">
           <ButtonLink href="/hq" variant="secondary">

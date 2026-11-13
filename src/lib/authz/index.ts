@@ -102,14 +102,16 @@ const RULES: Record<Capability, (a: Actor) => boolean> = {
   "evaluation.award_final": (a) => OOTC.includes(a.rank),
 };
 
+// Shown to members. Interim rules are tracked in docs/POLICY_CONFLICTS.md:
+// command.view PC-08, evaluation.submit PC-31, evaluation.review PC-34, evaluation.award_final PC-35.
 /** Human-readable access rule, kept beside RULES so the UI never restates it. */
 export const ACCESS_NOTE: Partial<Record<Capability, string>> = {
-  "command.view": "Captain and above (interim rule pending leadership, PC-08)",
+  "command.view": "Captain and above (interim rule)",
   "supervisor.view": "Sergeant and above",
   "personnel.manage": "Captain and above (interim)",
-  "evaluation.submit": "Sergeants and Lieutenants (interim rule pending leadership, PC-31)",
-  "evaluation.review": "Captain and above (interim rule pending leadership, PC-34)",
-  "evaluation.award_final": "Office of the Chiefs (interim rule pending leadership, PC-35)",
+  "evaluation.submit": "Sergeants and Lieutenants (interim rule)",
+  "evaluation.review": "Captain and above (interim rule)",
+  "evaluation.award_final": "Office of the Chiefs (interim rule)",
 };
 
 export function can(actor: Actor | null | undefined, capability: Capability): boolean {

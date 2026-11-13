@@ -208,11 +208,7 @@ function ActiveConsole({ session, now, week }: { session: SessionRecord; now: nu
             >
               <ExternalLink className="size-4" aria-hidden /> Open AnchorCAD
             </a>
-          ) : (
-            <p role="status" className="flex h-11 items-center justify-center gap-2 rounded-md bg-obsidian-2/90 px-4 text-xs font-medium text-on-dark-muted ring-1 ring-dark-line">
-              <ExternalLink className="size-4" aria-hidden /> AnchorCAD link not configured
-            </p>
-          )}
+          ) : null}
           <Button variant="danger" size="lg" onClick={patrol.requestEnd} loading={patrol.phase === "ending"} disabled={patrol.phase !== "on-duty"} icon={<Square className="size-3.5 fill-current" />}>
             {patrol.phase === "ending" ? "Ending…" : "End patrol"}
           </Button>

@@ -4,10 +4,10 @@ import { EvaluationDueCard } from "@/components/evaluations/reminders";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowRight, ArrowUpRight, BookOpen, Car, CheckCircle2, ClipboardList, ExternalLink, Gauge, GraduationCap, Lock, Radio, ShieldCheck, Square } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, Car, CheckCircle2, ClipboardList, ExternalLink, Gauge, GraduationCap, Lock, Radio, Scale, ShieldCheck, Square } from "lucide-react";
 import { sessionStatus } from "@/components/patrol/session-drawer";
 import { ANNOUNCEMENTS } from "@/lib/announcements";
-import { HANDBOOK_URL } from "@/lib/public-nav";
+import { HANDBOOK_URL, USE_OF_FORCE_URL } from "@/lib/public-nav";
 import { usePatrol } from "@/components/patrol/patrol-provider";
 import { useShell } from "@/components/shell/shell-context";
 import { Page } from "@/components/shell/page";
@@ -543,9 +543,9 @@ function QuickAccess() {
             <ExternalLink className="size-4 text-gold-ink" aria-hidden /> AnchorCAD
           </a>
         ) : (
-          <span title="The AnchorCAD link has not been configured yet" className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-line px-3 py-2.5 text-xs font-medium text-muted">
-            <ExternalLink className="size-4" aria-hidden /> AnchorCAD <span className="sr-only">(not configured)</span>
-          </span>
+          <a href={USE_OF_FORCE_URL} target="_blank" rel="noopener noreferrer" className={tile}>
+            <Scale className="size-4 text-gold-ink" aria-hidden /> Use of Force
+          </a>
         )}
         <a href={HANDBOOK_URL} target="_blank" rel="noopener noreferrer" className={tile}>
           <BookOpen className="size-4 text-gold-ink" aria-hidden /> Handbook
@@ -557,7 +557,6 @@ function QuickAccess() {
           <ClipboardList className="size-4 text-gold-ink" aria-hidden /> Requests
         </Link>
       </div>
-      {!ANCHORCAD_URL ? <p className="mt-1.5 text-3xs text-muted">AnchorCAD link not configured yet.</p> : null}
     </nav>
   );
 }
