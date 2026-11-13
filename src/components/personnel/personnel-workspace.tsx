@@ -88,12 +88,13 @@ export function PersonnelWorkspace() {
         </span>
       ),
     },
-    { key: "rank", header: "Rank", sort: (r) => RANKS.indexOf(r.member.rank), text: (r) => r.member.rank, cell: (r) => <RankMark rank={r.member.rank} /> },
-    { key: "callsign", header: "Call sign", sort: (r) => r.member.callsign, cell: (r) => <span className="font-medium tabular">{r.member.callsign}</span> },
-    { key: "district", header: "District", hideable: true, sort: (r) => r.member.district, cell: (r) => r.member.district },
-    { key: "divisions", header: "Divisions", hideable: true, sort: (r) => r.member.divisions.length, text: (r) => r.member.divisions.join("; "), cell: (r) => (r.member.divisions.length ? <span className="text-ink-2">{r.member.divisions.join(", ")}</span> : <span className="text-muted">—</span>) },
+    { key: "rank", hideBelow: "sm", header: "Rank", sort: (r) => RANKS.indexOf(r.member.rank), text: (r) => r.member.rank, cell: (r) => <RankMark rank={r.member.rank} /> },
+    { key: "callsign", hideBelow: "sm", header: "Call sign", sort: (r) => r.member.callsign, cell: (r) => <span className="font-medium tabular">{r.member.callsign}</span> },
+    { key: "district", hideBelow: "xl", header: "District", hideable: true, sort: (r) => r.member.district, cell: (r) => r.member.district },
+    { key: "divisions", hideBelow: "xl", header: "Divisions", hideable: true, sort: (r) => r.member.divisions.length, text: (r) => r.member.divisions.join("; "), cell: (r) => (r.member.divisions.length ? <span className="text-ink-2">{r.member.divisions.join(", ")}</span> : <span className="text-muted">—</span>) },
     {
       key: "week",
+      hideBelow: "sm",
       header: "This week",
       align: "right",
       hideable: true,

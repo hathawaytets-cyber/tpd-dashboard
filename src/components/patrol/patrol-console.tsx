@@ -356,12 +356,14 @@ export function SessionHistory({ state }: { state: PreviewState }) {
     },
     {
       key: "district",
+      hideBelow: "wide",
       header: "District",
       sort: (s) => s.district,
       cell: (s) => s.district,
     },
     {
       key: "range",
+      hideBelow: "sm",
       header: "Time range",
       text: (s) => `${time(s.start)}-${time(s.end!)}`,
       cell: (s) => (
@@ -387,6 +389,7 @@ export function SessionHistory({ state }: { state: PreviewState }) {
     },
     {
       key: "actions",
+      hideBelow: "sm",
       header: "Actions",
       align: "right",
       cell: (s) => (

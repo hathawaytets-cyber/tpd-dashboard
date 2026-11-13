@@ -107,11 +107,11 @@ export function LivePersonnel() {
         </span>
       ),
     },
-    { key: "callsign", header: "Call sign", hideable: true, sort: (m) => m.callsign, cell: (m) => m.callsign },
+    { key: "callsign", hideBelow: "sm", header: "Call sign", hideable: true, sort: (m) => m.callsign, cell: (m) => m.callsign },
     { key: "rank", header: "Rank", hideable: true, sort: (m) => RANKS.indexOf(m.rank), text: (m) => m.rank, cell: (m) => <RankMark rank={m.rank} /> },
-    { key: "appointment", header: "Appointment", hideable: true, sort: (m) => m.appointment, cell: (m) => m.appointment || "—" },
-    { key: "district", header: "District", hideable: true, sort: (m) => m.district, cell: (m) => m.district },
-    { key: "divisions", header: "Divisions", hideable: true, text: (m) => m.divisions.join("; "), cell: (m) => (m.divisions.length ? m.divisions.join(", ") : "—") },
+    { key: "appointment", hideBelow: "xl", header: "Appointment", hideable: true, sort: (m) => m.appointment, cell: (m) => m.appointment || "—" },
+    { key: "district", hideBelow: "lg", header: "District", hideable: true, sort: (m) => m.district, cell: (m) => m.district },
+    { key: "divisions", hideBelow: "xl", header: "Divisions", hideable: true, text: (m) => m.divisions.join("; "), cell: (m) => (m.divisions.length ? m.divisions.join(", ") : "—") },
   ];
 
   return (

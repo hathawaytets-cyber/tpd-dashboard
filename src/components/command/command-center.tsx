@@ -147,10 +147,24 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
   const closeSheet = () => router.replace(pathname, { scroll: false });
 
   const columns: Column<RequestRecord>[] = [
-    { key: "type", header: "Request type", sort: (r) => r.type, cell: (r) => <span className="font-semibold text-ink">{r.type}</span> },
-    { key: "id", header: "ID", sort: (r) => r.id, cell: (r) => <span className="text-ink-2 tabular">{r.id}</span> },
+    {
+      key: "type",
+      header: "Request",
+      sort: (r) => r.type,
+      text: (r) => `${r.type} ${r.id}`,
+      cell: (r) => (
+        <span className="leading-tight">
+          <span className="block font-semibold text-ink">{r.type}</span>
+          <span className="block text-3xs text-muted tabular">
+            {r.id}
+            <span className="sm:hidden"> · {memberById(r.memberId)!.name}</span>
+          </span>
+        </span>
+      ),
+    },
     {
       key: "member",
+      hideBelow: "sm",
       header: "Member",
       sort: (r) => memberById(r.memberId)!.name,
       cell: (r) => {
@@ -168,18 +182,20 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
         );
       },
     },
-    { key: "district", header: "District", hideable: true, sort: (r) => memberById(r.memberId)!.district, cell: (r) => memberById(r.memberId)!.district },
-    { key: "summary", header: "Summary", hideable: true, sort: (r) => r.summary, cell: (r) => <span className="block max-w-[200px] truncate text-ink-2 2xl:max-w-[320px]" title={r.summary}>{r.summary}</span> },
+    { key: "district", hideBelow: "lg", header: "District", hideable: true, sort: (r) => memberById(r.memberId)!.district, cell: (r) => memberById(r.memberId)!.district },
+    { key: "summary", hideBelow: "xl", header: "Summary", hideable: true, sort: (r) => r.summary, cell: (r) => <span className="block max-w-[200px] truncate text-ink-2 2xl:max-w-[320px]" title={r.summary}>{r.summary}</span> },
     {
       key: "reviewer",
+      hideBelow: "wide",
       header: "Reviewer",
       hideable: true,
       sort: (r) => (r.reviewerId ? memberById(r.reviewerId)!.name : "~"),
       cell: (r) => (r.reviewerId ? r.reviewerId === me.member.id ? <Pill tone="gold">You</Pill> : memberById(r.reviewerId)!.name : <span className="text-muted">Unassigned</span>),
     },
-    { key: "age", header: "Age", align: "right", hideable: true, sort: (r) => -r.createdAt, text: (r) => new Date(r.createdAt).toISOString(), cell: (r) => age(r.createdAt, now) },
+    { key: "age", hideBelow: "wide", header: "Age", align: "right", hideable: true, sort: (r) => -r.createdAt, text: (r) => new Date(r.createdAt).toISOString(), cell: (r) => age(r.createdAt, now) },
     {
       key: "due",
+      hideBelow: "xl",
       header: "Due",
       align: "right",
       hideable: true,
@@ -197,6 +213,7 @@ function CommandInner({ state, now }: { state: PreviewState; now: number }) {
     { key: "status", header: "Status", sort: (r) => r.state, cell: (r) => <Pill tone={stateTone(r.state)}>{r.state}</Pill> },
     {
       key: "actions",
+      hideBelow: "sm",
       header: "Actions",
       align: "right",
       cell: (r) => {

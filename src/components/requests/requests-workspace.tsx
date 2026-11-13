@@ -67,7 +67,7 @@ export function RequestsWorkspace() {
       cell: (r) => (
         <span className="block leading-tight">
           <span className="block font-semibold">{r.type}</span>
-          <span className="block text-3xs text-muted">
+          <span className="block max-w-[150px] truncate text-3xs text-muted sm:max-w-none" title={`${r.id} · ${r.summary}`}>
             {r.id} · {r.summary}
           </span>
         </span>
@@ -75,6 +75,7 @@ export function RequestsWorkspace() {
     },
     {
       key: "member",
+      hideBelow: "sm",
       header: "Member",
       hideable: true,
       defaultHidden: current === "mine",
@@ -89,8 +90,8 @@ export function RequestsWorkspace() {
         );
       },
     },
-    { key: "reviewer", header: "Reviewer", hideable: true, sort: (r) => (r.reviewerId ? memberById(r.reviewerId)!.name : "~"), cell: (r) => (r.reviewerId ? memberById(r.reviewerId)!.name : <span className="text-muted">Unassigned</span>) },
-    { key: "submitted", header: "Submitted", align: "right", sort: (r) => r.createdAt, cell: (r) => new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) },
+    { key: "reviewer", hideBelow: "lg", header: "Reviewer", hideable: true, sort: (r) => (r.reviewerId ? memberById(r.reviewerId)!.name : "~"), cell: (r) => (r.reviewerId ? memberById(r.reviewerId)!.name : <span className="text-muted">Unassigned</span>) },
+    { key: "submitted", hideBelow: "sm", header: "Submitted", align: "right", sort: (r) => r.createdAt, cell: (r) => new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) },
     { key: "status", header: "Status", sort: (r) => r.state, cell: (r) => <Pill tone={stateTone(r.state)}>{r.state}</Pill> },
   ];
 
