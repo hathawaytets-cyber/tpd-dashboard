@@ -296,7 +296,11 @@ function SideButton({ collapsed, label, hint, onClick, children }: { collapsed: 
       {collapsed ? null : (
         <>
           <span>{label}</span>
-          {hint ? <span className="ml-auto text-3xs text-on-dark-muted/60">{hint}</span> : null}
+          {hint ? (
+            <kbd aria-hidden className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-xs border border-dark-line bg-white/5 px-1 font-sans text-3xs font-semibold text-on-dark-muted">
+              {hint}
+            </kbd>
+          ) : null}
         </>
       )}
     </button>
