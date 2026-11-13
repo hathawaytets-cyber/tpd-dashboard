@@ -107,11 +107,11 @@ export function LivePersonnel() {
         </span>
       ),
     },
-    { key: "callsign", header: "Call sign", hideable: true, sort: (m) => m.callsign, cell: (m) => m.callsign },
+    { key: "callsign", hideBelow: "sm", header: "Call sign", hideable: true, sort: (m) => m.callsign, cell: (m) => m.callsign },
     { key: "rank", header: "Rank", hideable: true, sort: (m) => RANKS.indexOf(m.rank), text: (m) => m.rank, cell: (m) => <RankMark rank={m.rank} /> },
-    { key: "appointment", header: "Appointment", hideable: true, sort: (m) => m.appointment, cell: (m) => m.appointment || "—" },
-    { key: "district", header: "District", hideable: true, sort: (m) => m.district, cell: (m) => m.district },
-    { key: "divisions", header: "Divisions", hideable: true, text: (m) => m.divisions.join("; "), cell: (m) => (m.divisions.length ? m.divisions.join(", ") : "—") },
+    { key: "appointment", hideBelow: "xl", header: "Appointment", hideable: true, sort: (m) => m.appointment, cell: (m) => m.appointment || "—" },
+    { key: "district", hideBelow: "lg", header: "District", hideable: true, sort: (m) => m.district, cell: (m) => m.district },
+    { key: "divisions", hideBelow: "xl", header: "Divisions", hideable: true, text: (m) => m.divisions.join("; "), cell: (m) => (m.divisions.length ? m.divisions.join(", ") : "—") },
   ];
 
   return (
@@ -168,7 +168,7 @@ export function LiveCommand() {
       <Page>
         <div className="mx-auto mt-10 max-w-md rounded-xl border border-line bg-surface p-8 text-center shadow-sm">
           <h1 className="display text-xl font-bold">Command Center is restricted</h1>
-          <p className="mt-2 text-xs text-muted">Access: Captain and above (interim rule pending leadership, PC-08). Your rank is {verified.rank}. The same rule is enforced by the database, not only by this page.</p>
+          <p className="mt-2 text-xs text-muted">Open to Captain and above (interim rule). Your rank is {verified.rank}.</p>
           <ButtonLink href="/hq" variant="secondary" className="mt-5">
             Back to overview
           </ButtonLink>

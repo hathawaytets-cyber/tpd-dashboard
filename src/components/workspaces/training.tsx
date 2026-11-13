@@ -101,7 +101,7 @@ export function TrainingWorkspace() {
               {can(me.actor, "training.approve_independent")
                 ? "As a member of the Office of the Chiefs you will approve independent patrol here."
                 : "PTOs record module sign-offs and the Office of the Chiefs approves independent patrol."}{" "}
-              These controls arrive in Milestone 5, once leadership settles how PTO assignments work (PC-06).
+              Sign-offs open here once leadership confirms how PTO assignments work.
             </p>
           </Card>
         </div>

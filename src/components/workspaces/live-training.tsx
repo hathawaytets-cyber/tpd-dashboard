@@ -84,7 +84,7 @@ export function LiveTraining(){
    <LiveClearancePanel signoffs={items}/>
    {isOotc&&<Card>
     <CardHeader title="Office of the Chiefs · Module sign-offs"
-     description="Confirm training evidence for an active probationary officer. Only OOTC can sign off modules until the PTO authority policy is resolved (PC-06)." />
+     description="Confirm training evidence for an active probationary officer. Only OOTC can sign off modules until leadership confirms PTO authority." />
     <div className="space-y-4 border-t border-line p-4 text-xs">
      {trainees.length===0?<EmptyState icon={<GraduationCap/>} title="No probationary officers currently on the roster"
       body="The roster will populate this list when a probationary member is added."/>:<>

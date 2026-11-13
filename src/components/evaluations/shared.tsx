@@ -9,17 +9,17 @@ import { cn } from "@/lib/cn";
 import { STATUS_LABEL, type EligibleOfficer, type ObligationStatus } from "@/lib/evaluations";
 
 export const STATUS_TONE: Record<ObligationStatus, Tone> = {
-  upcoming: "neutral",
+  upcoming: "quiet",
   not_started: "gold",
   draft: "info",
-  submitted: "green",
+  submitted: "quiet",
   overdue: "red",
-  excused: "neutral",
+  excused: "quiet",
 };
 
 export function StatusPill({ status, late, className }: { status: ObligationStatus; late?: boolean; className?: string }) {
   return (
-    <Pill tone={late && status === "submitted" ? "amber" : STATUS_TONE[status]} dotted className={className}>
+    <Pill tone={late && status === "submitted" ? "amber" : STATUS_TONE[status]} dotted={status === "submitted" && !late ? "green" : true} className={className}>
       {late && status === "submitted" ? "Submitted late" : STATUS_LABEL[status]}
     </Pill>
   );

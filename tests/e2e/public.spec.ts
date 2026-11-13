@@ -15,7 +15,7 @@ test("homepage shows verified leadership, vacancies and staffing", async ({ page
   const lead = page.locator("#leadership");
   await expect(lead.getByText("J. Quinellope")).toBeVisible();
   await expect(lead.getByText("Chief of Police · Overall Operations")).toBeVisible();
-  await expect(lead.getByText("Vacant").first()).toBeVisible();
+  await expect(lead.getByText(/more positions open/).first()).toBeVisible();
   await expect(page.getByText("13 / 134")).toBeVisible();
   await expect(page.locator("#divisions").getByText("M. Hathaway")).toBeVisible();
   const html = await page.content();

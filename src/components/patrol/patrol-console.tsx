@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
-import { AlertTriangle, BookOpen, Car, ExternalLink, History, Lock, MapPin, Play, RotateCw, ShieldCheck, Square } from "lucide-react";
+import { AlertTriangle, BookOpen, Car, Check, ExternalLink, History, Lock, MapPin, Play, RotateCw, ShieldCheck, Square } from "lucide-react";
 import { usePatrol } from "./patrol-provider";
 import { SessionDrawer, sessionStatus } from "./session-drawer";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -208,11 +208,7 @@ function ActiveConsole({ session, now, week }: { session: SessionRecord; now: nu
             >
               <ExternalLink className="size-4" aria-hidden /> Open AnchorCAD
             </a>
-          ) : (
-            <p role="status" className="flex h-11 items-center justify-center gap-2 rounded-md bg-obsidian-2/90 px-4 text-xs font-medium text-on-dark-muted ring-1 ring-dark-line">
-              <ExternalLink className="size-4" aria-hidden /> AnchorCAD link not configured
-            </p>
-          )}
+          ) : null}
           <Button variant="danger" size="lg" onClick={patrol.requestEnd} loading={patrol.phase === "ending"} disabled={patrol.phase !== "on-duty"} icon={<Square className="size-3.5 fill-current" />}>
             {patrol.phase === "ending" ? "Ending…" : "End patrol"}
           </Button>
@@ -356,12 +352,14 @@ export function SessionHistory({ state }: { state: PreviewState }) {
     },
     {
       key: "district",
+      hideBelow: "wide",
       header: "District",
       sort: (s) => s.district,
       cell: (s) => s.district,
     },
     {
       key: "range",
+      hideBelow: "sm",
       header: "Time range",
       text: (s) => `${time(s.start)}-${time(s.end!)}`,
       cell: (s) => (
@@ -387,6 +385,7 @@ export function SessionHistory({ state }: { state: PreviewState }) {
     },
     {
       key: "actions",
+      hideBelow: "sm",
       header: "Actions",
       align: "right",
       cell: (s) => (
@@ -560,7 +559,11 @@ export function Fleet() {
                 <p className="truncate text-3xs text-muted">In game: {v.model}</p>
                 <p className="truncate text-3xs text-muted">{v.use}</p>
               </div>
-              {ok ? <Pill tone="green">Authorized</Pill> : <span className="text-3xs whitespace-nowrap text-muted">{v.minRank}+</span>}
+              {ok ? (
+                <span className="inline-flex items-center gap-1 text-3xs font-medium whitespace-nowrap text-muted">
+                  <Check className="size-3 text-green" aria-hidden /> Authorized
+                </span>
+              ) : <span className="text-3xs whitespace-nowrap text-muted">{v.minRank}+</span>}
             </li>
           );
         })}

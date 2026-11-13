@@ -119,7 +119,7 @@ export function LivePatrol({ section = "patrol" }: { section?: "patrol" | "activ
   return (
     <Page wide>
       <PageHeader eyebrow="Operations" title={section === "patrol" ? "Patrol console" : "My activity"}
-        description="Sessions are saved in Supabase using server timestamps. Monday–Sunday in Eastern Time is an interim reporting week (PC-14)." />
+        description="Start and end times are recorded by the server. The reporting week runs Monday to Sunday, Eastern Time (interim)." />
       <div className="space-y-5">
         {error && <Callout tone="error" title="Patrol backend error">{error} Your session was not modified locally. Use Refresh to verify server state.</Callout>}
         <Callout tone="info" title="Recorded hours are not automatically approved">

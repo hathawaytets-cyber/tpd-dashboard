@@ -150,17 +150,18 @@ function Compliance({ from, to, selfId }: { from: string; to: string; selfId: st
       header: "Supervisor",
       cell: (r) => (
         <span>
-          {r.supervisor.rank} {r.supervisor.name}
-          <span className="text-muted"> · {r.supervisor.callsign ?? "—"}</span>
+          <span className="hidden sm:inline">{r.supervisor.rank} </span>
+          {r.supervisor.name}
+          <span className="hidden text-muted sm:inline"> · {r.supervisor.callsign ?? "—"}</span>
         </span>
       ),
       sort: (r) => r.supervisor.name,
       text: (r) => `${r.supervisor.rank} ${r.supervisor.name}`,
     },
     { key: "status", header: "Status", cell: (r) => <StatusPill status={r.status} late={r.late} />, sort: (r) => r.status, text: (r) => (r.late ? "Submitted late" : STATUS_LABEL[r.status]) },
-    { key: "basis", header: "Basis", cell: (r) => <span className="text-muted">{r.source === "assignment" ? "Assignment" : "Patrol log"}</span>, sort: (r) => r.source, hideable: true },
-    { key: "due", header: "Deadline", cell: (r) => <span className="text-muted">{fmt(r.deadline)}</span>, sort: (r) => r.deadline, text: (r) => new Date(r.deadline).toISOString(), hideable: true },
-    { key: "submitted", header: "Submitted", cell: (r) => (r.submittedAt ? fmt(r.submittedAt) : <span className="text-muted">{r.excuseReason ?? "—"}</span>), sort: (r) => r.submittedAt ?? 0, text: (r) => (r.submittedAt ? new Date(r.submittedAt).toISOString() : r.excuseReason ?? "") },
+    { key: "basis", hideBelow: "xl", header: "Basis", cell: (r) => <span className="text-muted">{r.source === "assignment" ? "Assignment" : "Patrol log"}</span>, sort: (r) => r.source, hideable: true },
+    { key: "due", hideBelow: "lg", header: "Deadline", cell: (r) => <span className="text-muted">{fmt(r.deadline)}</span>, sort: (r) => r.deadline, text: (r) => new Date(r.deadline).toISOString(), hideable: true },
+    { key: "submitted", hideBelow: "xl", header: "Submitted", cell: (r) => (r.submittedAt ? fmt(r.submittedAt) : <span className="text-muted">{r.excuseReason ?? "—"}</span>), sort: (r) => r.submittedAt ?? 0, text: (r) => (r.submittedAt ? new Date(r.submittedAt).toISOString() : r.excuseReason ?? "") },
   ];
 
   return (
@@ -232,15 +233,15 @@ function Compliance({ from, to, selfId }: { from: string; to: string; selfId: st
         <Card>
           <CardHeader title="By supervisor" description="Historical compliance for the selected range. Missing reports are shown for follow-up, never as automatic discipline." />
           <div className="overflow-x-auto border-t border-line">
-            <table className="w-full min-w-[560px] text-xs">
+            <table className="w-full text-xs">
               <thead>
                 <tr className="text-left text-3xs text-muted">
                   <th scope="col" className="px-4 py-2 font-medium">Supervisor</th>
-                  <th scope="col" className="px-4 py-2 text-right font-medium">Required</th>
-                  <th scope="col" className="px-4 py-2 text-right font-medium">On time</th>
-                  <th scope="col" className="px-4 py-2 text-right font-medium">Late</th>
+                  <th scope="col" className="hidden px-4 py-2 text-right font-medium sm:table-cell">Required</th>
+                  <th scope="col" className="hidden px-4 py-2 text-right font-medium sm:table-cell">On time</th>
+                  <th scope="col" className="hidden px-4 py-2 text-right font-medium sm:table-cell">Late</th>
                   <th scope="col" className="px-4 py-2 text-right font-medium">Overdue</th>
-                  <th scope="col" className="px-4 py-2 text-right font-medium">Excused</th>
+                  <th scope="col" className="hidden px-4 py-2 text-right font-medium sm:table-cell">Excused</th>
                   <th scope="col" className="px-4 py-2 text-right font-medium">Compliance</th>
                 </tr>
               </thead>
@@ -248,13 +249,14 @@ function Compliance({ from, to, selfId }: { from: string; to: string; selfId: st
                 {bySupervisor.map((s) => (
                   <tr key={s.who.id}>
                     <th scope="row" className="px-4 py-2.5 text-left font-semibold">
-                      {s.who.rank} {s.who.name} <span className="font-normal text-muted">· {s.who.callsign ?? "—"}</span>
+                      <span className="hidden sm:inline">{s.who.rank} </span>
+                      {s.who.name} <span className="hidden font-normal text-muted sm:inline">· {s.who.callsign ?? "—"}</span>
                     </th>
-                    <td className="px-4 py-2.5 text-right tabular">{s.required}</td>
-                    <td className="px-4 py-2.5 text-right tabular">{s.onTime}</td>
-                    <td className="px-4 py-2.5 text-right tabular">{s.late}</td>
+                    <td className="hidden px-4 py-2.5 text-right tabular sm:table-cell">{s.required}</td>
+                    <td className="hidden px-4 py-2.5 text-right tabular sm:table-cell">{s.onTime}</td>
+                    <td className="hidden px-4 py-2.5 text-right tabular sm:table-cell">{s.late}</td>
                     <td className={`px-4 py-2.5 text-right tabular ${s.missing ? "font-semibold text-red" : ""}`}>{s.missing}</td>
-                    <td className="px-4 py-2.5 text-right tabular">{s.excused}</td>
+                    <td className="hidden px-4 py-2.5 text-right tabular sm:table-cell">{s.excused}</td>
                     <td className="px-4 py-2.5 text-right tabular">{s.required ? `${Math.round(((s.onTime + s.late) / s.required) * 100)}%` : "—"}</td>
                   </tr>
                 ))}

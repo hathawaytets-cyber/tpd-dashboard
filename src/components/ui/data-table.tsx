@@ -19,7 +19,20 @@ export interface Column<T> {
   /** Can the viewer hide this column? The first column never hides. */
   hideable?: boolean;
   defaultHidden?: boolean;
+  /**
+   * Secondary detail that drops out below a viewport width so the table fits
+   * its card instead of scrolling sideways. The first column always shows.
+   * "wide" is 1400 px: a 1440 px laptop with the sidebar open.
+   */
+  hideBelow?: "sm" | "lg" | "xl" | "wide";
 }
+
+const HIDE_BELOW = {
+  sm: "hidden sm:table-cell",
+  lg: "hidden lg:table-cell",
+  xl: "hidden xl:table-cell",
+  wide: "hidden min-[1400px]:table-cell",
+} as const;
 
 export type SortState = { key: string; dir: "asc" | "desc" } | null;
 
@@ -149,7 +162,7 @@ export function DataTable<T>({
       </div>
 
       <div className="scrollbar-thin max-h-[560px] overflow-auto border-t border-line">
-        <table aria-label={label} className="w-full min-w-[720px] border-separate border-spacing-0 text-left text-xs whitespace-nowrap">
+        <table aria-label={label} className="w-full border-separate border-spacing-0 text-left text-xs whitespace-nowrap">
           <thead className="sticky top-0 z-10 bg-surface-2/95 backdrop-blur">
             <tr>
               {selectable ? (
@@ -178,7 +191,7 @@ export function DataTable<T>({
                     key={c.key}
                     scope="col"
                     aria-sort={active ? (sort!.dir === "asc" ? "ascending" : "descending") : undefined}
-                    className={cn("border-b border-line py-2 text-3xs font-semibold whitespace-nowrap text-muted", i === 0 && !selectable ? "pl-4" : "pl-3", c.align === "right" ? "pr-3 text-right" : "pr-2")}
+                    className={cn("border-b border-line py-2 text-3xs font-semibold whitespace-nowrap text-muted", i === 0 && !selectable ? "pl-4" : "pl-3", c.align === "right" ? "pr-3 text-right" : "pr-2", c.hideBelow && HIDE_BELOW[c.hideBelow])}
                   >
                     {c.sort ? (
                       <button
@@ -205,7 +218,9 @@ export function DataTable<T>({
           <tbody>
             {shown.length === 0 ? (
               <tr>
-                <td colSpan={visible.length + (selectable ? 1 : 0) + (rowMenu ? 1 : 0)}>{empty}</td>
+                <td colSpan={visible.length + (selectable ? 1 : 0) + (rowMenu ? 1 : 0)} className="whitespace-normal">
+                  {empty}
+                </td>
               </tr>
             ) : (
               shown.map((row) => {
@@ -239,7 +254,7 @@ export function DataTable<T>({
                       </td>
                     ) : null}
                     {visible.map((c, i) => (
-                      <td key={c.key} className={cn("border-b border-line py-2.5 align-middle", i === 0 && !selectable ? "pl-4" : "pl-3", c.align === "right" ? "pr-3 text-right tabular" : "pr-2", c.className)}>
+                      <td key={c.key} className={cn("border-b border-line py-2.5 align-middle", i === 0 && !selectable ? "pl-4" : "pl-3", c.align === "right" ? "pr-3 text-right tabular" : "pr-2", c.hideBelow && HIDE_BELOW[c.hideBelow], c.className)}>
                         {i === 0 && onRowClick ? (
                           <button
                             type="button"
