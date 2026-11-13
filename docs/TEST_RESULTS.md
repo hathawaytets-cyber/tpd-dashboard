@@ -63,3 +63,17 @@ Production build, headless Chromium. tsc and lint pass; build succeeds.
 Bugs found and fixed: dashboard table forced phones to zoom out (layout 491 px on a 412 px screen); patrol hero image reduced contrast behind actions; decision queue actions clipped at 1440 px.
 
 Limits: all data is the browser-local preview store. "Server-side" checks are the store's operation guards, which mirror the planned server contracts; they are not a server. Not yet tested: axe scan, screen readers, Safari and Firefox.
+
+## Internal Affairs and AnchorCAD · 2026-11-13 · branch `feature/internal-affairs-anchorcad`
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck` | Pass |
+| `npm run lint` | Pass, 0 errors (2 pre-existing warnings in files this branch does not touch) |
+| `npm test` (Vitest) | 225 passed, 12 files (new: IA model, intake client, IA Edge Function helpers) |
+| `supabase/tests/run-local.sh` (PostgreSQL, fresh DB per suite) | `ia.test.sql` ALL IA TESTS PASSED; `rls.test.sql` ALL RLS TESTS PASSED (fixed pre-existing failure) |
+| `deno check` ia-intake, ia-evidence | Pass |
+| `STATIC_EXPORT=1 next build` | Pass; `/report`, `/report/status`, `/hq/report`, `/hq/internal-affairs{,/case,/appointments}`, `/hq/cad` exported. No service key, CAD key or pepper in `out/` |
+| `npx playwright test` | 37 passed, 14 skipped (the stubbed-backend suite, which skips in the preview build as before) |
+| Mobile overflow sweep (Pixel 7) | No overflow on the six new screens |
+| Screenshots | 1440 px and 390 px, light and dark, reviewed |
