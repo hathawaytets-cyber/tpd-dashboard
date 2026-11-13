@@ -112,3 +112,22 @@ None of these tests talks to the real Discord, Google, Supabase or AnchorCAD; th
 2. Redeploy `discord-verify`, `integration-health` (fix: command users were matched against the first personnel row instead of their own; authenticates before anything else) and `roster-sync` (truncation guard; dry run with the sync secret). Deploy the new code BEFORE turning Verify JWT OFF for `discord-verify` and `integration-health`: the new code authenticates first, the old `discord-verify` did not.
 3. Missing secrets: `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`, `ROSTER_SYNC_SECRET`. Then the scheduler SQL.
 4. Rebuild and deploy the site (needs approval).
+
+## AnchorCAD (2026-11-13)
+
+Official community: `https://anchr.gg/join?communityid=vcfsrp`. A join link lets a member ask to join the community
+inside AnchorCAD; it is **not** API access and gives this site no right to read CAD data.
+
+- **Implemented: launch-and-reference.** `/hq/cad` explains how to join, links the community and (when
+  `NEXT_PUBLIC_ANCHORCAD_URL` is set to an official host) the panel. Internal Affairs logs AnchorCAD records as
+  references (record number or link); nothing is imported, scraped or displayed from CAD.
+- **API facts (docs.anchr.gg, read 2026-11-13).** Base `https://anchorcad.xyz/api/v1`, header `x-api-key`, keys are
+  panel-bound and scoped, about 120 requests/minute per IP. Endpoints cover members, civilians, dispatch, units,
+  departments and read-only records (incidents, warrants, citations). There are **no** evidence or bodycam endpoints,
+  **no** OAuth or account linking, **no** webhooks, and response fields are undocumented. The terms forbid
+  circumventing access controls.
+- **Not activated: read-only sync (proposal).** If command wants record lookups later: a panel owner issues a key limited to
+  read-only scopes (records and server info), stored solely as the `ANCHORCAD_API_KEY` Edge Function secret; an Edge
+  Function looks up a record number on demand for an authorized IA user and stores only the reference and a
+  verification timestamp. AnchorCAD stays the system of record. Needs dede's approval, the key, and verified response
+  shapes before any code reads records.

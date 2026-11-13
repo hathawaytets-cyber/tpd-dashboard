@@ -18,7 +18,7 @@ import { useIaAccess } from "./use-ia";
 const fmtDate = (s: string) => new Date(s).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
 export function IaDashboard() {
-  const { access, preview } = useIaAccess();
+  const { access, preview, reload } = useIaAccess();
   const [rows, setRows] = useState<CaseRow[] | null>(preview ? PREVIEW_CASES : null);
   const [error, setError] = useState<string | null>(null);
   const [queue, setQueue] = useState<Queue | "all">("all");
@@ -31,11 +31,17 @@ export function IaDashboard() {
     let alive = true;
     setError(null);
     ia.dashboard()
-      .then((r) => alive && setRows(r))
+      .then((r) => {
+        if (!alive) return;
+        setRows(r);
+        // Alerts carry no case content (only a kind and a case id); seeing the queues clears them.
+        if (access.unread > 0) void ia.markRead().then(reload, () => undefined);
+      })
       .catch((e) => alive && setError(e instanceof Error ? e.message : "Cases could not be loaded."));
     return () => {
       alive = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when access or the retry counter changes, not on every unread change
   }, [preview, access?.has_access, n]);
 
   const counts = useMemo(() => queueCounts(rows ?? []), [rows]);
@@ -57,7 +63,14 @@ export function IaDashboard() {
         eyebrow="Internal Affairs · Confidential"
         title="Case management"
         description="Complaints, investigations and reviews under the Internal Affairs SOP. Only IA appointees and the designated oversight posts can open these records, and every case view is logged."
-        meta={roleText ? <Pill tone="neutral">{roleText}</Pill> : null}
+        meta={
+          roleText || access?.unread ? (
+            <>
+              {roleText ? <Pill tone="neutral">{roleText}</Pill> : null}
+              {access?.unread ? <Pill tone="gold">{access.unread} new {access.unread === 1 ? "alert" : "alerts"}</Pill> : null}
+            </>
+          ) : null
+        }
         actions={
           <>
             <ButtonLink href="/hq/internal-affairs/appointments" variant="secondary" size="md">
