@@ -27,11 +27,11 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section aria-labelledby="hero-h" className="relative isolate overflow-hidden bg-obsidian text-on-dark">
-        <Image src="/brand/charger-hero.webp" alt="" fill priority sizes="100vw" className="-z-20 object-cover object-[70%_55%]" />
-        <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,var(--obsidian)_22%,color-mix(in_srgb,var(--obsidian)_70%,transparent)_52%,color-mix(in_srgb,var(--obsidian)_15%,transparent)),linear-gradient(0deg,var(--obsidian),transparent_35%)]" />
-        <div className="mx-auto max-w-7xl px-4 pt-16 pb-20 sm:px-6 md:pt-24 md:pb-28 lg:px-8">
+        <Image src="/brand/charger-hero.webp" alt="" fill priority sizes="100vw" className="-z-20 hidden object-cover object-[70%_55%] md:block" />
+        <div aria-hidden className="absolute inset-0 -z-10 hidden md:block md:bg-[linear-gradient(90deg,var(--obsidian)_22%,color-mix(in_srgb,var(--obsidian)_70%,transparent)_52%,color-mix(in_srgb,var(--obsidian)_15%,transparent)),linear-gradient(0deg,var(--obsidian),transparent_35%)]" />
+        <div className="mx-auto max-w-7xl px-4 pt-16 pb-6 sm:px-6 md:pt-24 md:pb-28 lg:px-8">
           <Badge size={92} priority className="drop-shadow-[0_8px_24px_rgb(0_0_0/0.6)]" />
-          <p className="mt-7 text-2xs font-semibold tracking-[0.2em] text-gold uppercase">Florida State Roleplay</p>
+          <p className="mt-7 text-xs font-semibold text-gold">Florida State Roleplay</p>
           <h1 id="hero-h" className="display-x mt-3 max-w-3xl text-[clamp(2.6rem,7vw,5.25rem)] leading-[0.95] font-bold tracking-tight">
             Tampa Police Department
           </h1>
@@ -46,6 +46,11 @@ export default function HomePage() {
               Member portal
             </ButtonLink>
           </div>
+        </div>
+        {/* Phones: the car gets its own band under the copy, so the headline never sits on its lettering. */}
+        <div aria-hidden className="relative aspect-[16/10] md:hidden">
+          <Image src="/brand/charger-hero.webp" alt="" fill sizes="100vw" className="object-cover object-[62%_55%]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--obsidian),transparent_30%,transparent_75%,var(--obsidian))]" />
         </div>
       </section>
 
@@ -87,12 +92,14 @@ export default function HomePage() {
               Start your application <ArrowUpRight aria-hidden className="size-4" />
             </a>
           </div>
-          <ol className="relative grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ol className="grid grid-cols-1 gap-x-10 self-start border-b border-line sm:grid-flow-col sm:grid-cols-2 sm:grid-rows-4">
             {PATHWAY.map((step, i) => (
-              <li key={step.title} className={cn("relative rounded-lg border p-5", i === PATHWAY.length - 1 ? "border-obsidian bg-obsidian text-on-dark" : "border-line bg-surface")}>
-                <span className={cn("display text-2xl font-bold tabular", i === PATHWAY.length - 1 ? "text-gold" : "text-gold-ink")}>{String(i + 1).padStart(2, "0")}</span>
-                <p className="mt-2 text-sm font-semibold">{step.title}</p>
-                <p className={cn("mt-1 text-xs leading-relaxed", i === PATHWAY.length - 1 ? "text-on-dark-muted" : "text-muted")}>{step.detail}</p>
+              <li key={step.title} className="grid grid-cols-[2rem_1fr] gap-x-3 border-t border-line py-4">
+                <span className="pt-px text-xs font-semibold text-gold-ink tabular">{String(i + 1).padStart(2, "0")}</span>
+                <span>
+                  <span className="block text-sm font-semibold">{step.title}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted">{step.detail}</span>
+                </span>
               </li>
             ))}
           </ol>
@@ -129,16 +136,13 @@ export default function HomePage() {
             {DISTRICTS.map((d) => {
               const cpt = positionByCallsign(d.captain);
               return (
-                <div key={d.name} className="group relative overflow-hidden rounded-xl border border-line bg-surface p-7 shadow-sm">
-                  <span aria-hidden className="display-x pointer-events-none absolute -right-2 -bottom-6 text-[120px] leading-none font-bold text-sunken select-none">
-                    {d.name[0]}
-                  </span>
+                <div key={d.name} className="rounded-xl border border-line bg-surface p-7 shadow-sm">
                   <Radio className="size-5 text-gold-ink" aria-hidden />
                   <p className="display mt-4 text-xl font-bold">{d.name} District</p>
                   <p className="mt-1 text-xs text-muted">
                     Call signs <span className="font-semibold text-ink tabular">{d.callsignRange}</span>
                   </p>
-                  <dl className="relative mt-6 grid grid-cols-2 gap-3 text-xs">
+                  <dl className="mt-6 grid grid-cols-2 gap-3 text-xs">
                     <div>
                       <dt className="text-3xs text-muted">District captain</dt>
                       <dd className="font-semibold">{cpt?.holder ?? "Vacant"}</dd>
@@ -202,34 +206,46 @@ export default function HomePage() {
             Leadership
           </h2>
           <p className="mt-3 max-w-2xl text-sm text-ink-2">
-            The department is led by the Office of the Chiefs. Positions are shown as listed on the official roster (checked {VERIFIED_ON}); unfilled positions are marked vacant.
+            The department is led by the Office of the Chiefs. Appointments are shown as listed on the official roster (checked {VERIFIED_ON}), with open positions counted under each group.
           </p>
-          <ol className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {LEADERSHIP.map((g) => (
-              <li key={g.tier} className={cn("rounded-xl p-5", g.stars === 4 ? "bg-obsidian text-on-dark md:col-span-2" : "border border-line bg-surface")}>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold">{g.tier}</p>
-                  <span aria-label={`${g.stars} star tier`} className="flex gap-0.5">
-                    {Array.from({ length: g.stars }, (_, i) => (
-                      <Star key={i} aria-hidden strokeWidth={0} className={cn("size-3 fill-current", g.stars === 4 ? "text-gold" : "text-gold-ink")} />
-                    ))}
-                  </span>
-                </div>
-                <ul className={cn("mt-3 grid grid-cols-1 gap-x-6 gap-y-2.5", g.stars === 4 && "sm:grid-cols-2 lg:grid-cols-4")}>
-                  {g.rows.map((x, i) => (
-                    <li key={`${x.callsign}-${i}`} className="flex items-baseline justify-between gap-3 text-xs">
-                      <span className="min-w-0">
-                        <span className={cn("block truncate font-semibold", !x.holder && (g.stars === 4 ? "text-on-dark-muted" : "text-muted"))}>{x.holder ?? "Vacant"}</span>
-                        <span className={cn("block truncate text-3xs", g.stars === 4 ? "text-on-dark-muted" : "text-muted")}>
-                          {x.rank} · {x.appointment}
-                        </span>
-                      </span>
-                      <span className={cn("shrink-0 text-3xs font-semibold tabular", g.stars === 4 ? "text-gold" : "text-gold-ink")}>{x.callsign ?? "—"}</span>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
+          <ol className="mt-8 grid grid-cols-1 items-start gap-4 md:grid-cols-3">
+            {LEADERSHIP.map((g) => {
+              const held = g.rows.filter((x) => x.holder);
+              const open = g.rows.length - held.length;
+              const dark = g.stars === 4;
+              return (
+                <li key={g.tier} className={cn("flex flex-col rounded-xl p-5", dark ? "bg-obsidian text-on-dark md:col-span-3" : "border border-line bg-surface")}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold">{g.tier}</p>
+                    <span aria-label={`${g.stars} star tier`} className="flex gap-0.5">
+                      {Array.from({ length: g.stars }, (_, i) => (
+                        <Star key={i} aria-hidden strokeWidth={0} className={cn("size-3 fill-current", dark ? "text-gold" : "text-gold-ink")} />
+                      ))}
+                    </span>
+                  </div>
+                  {held.length > 0 ? (
+                    <ul className={cn("mt-3 grid grid-cols-1 gap-x-6 gap-y-2.5", dark && "sm:grid-cols-2 lg:grid-cols-4")}>
+                      {held.map((x, i) => (
+                        <li key={`${x.callsign}-${i}`} className="flex items-baseline justify-between gap-3 text-xs">
+                          <span className="min-w-0">
+                            <span className="block truncate font-semibold">{x.holder}</span>
+                            <span className={cn("block truncate text-3xs", dark ? "text-on-dark-muted" : "text-muted")}>
+                              {x.rank} · {x.appointment}
+                            </span>
+                          </span>
+                          <span className={cn("shrink-0 text-3xs font-semibold tabular", dark ? "text-gold" : "text-gold-ink")}>{x.callsign ?? "—"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {open > 0 ? (
+                    <p className={cn("text-3xs text-muted", held.length > 0 ? "mt-4 border-t border-line pt-3" : "mt-3")}>
+                      {held.length > 0 ? `${open} more ${open === 1 ? "position" : "positions"} open` : `${open} positions open, none appointed yet`}
+                    </p>
+                  ) : null}
+                </li>
+              );
+            })}
           </ol>
           <p className="mt-4 text-2xs text-muted">
             {POSITIONS.length - STAFF.vacant - LEADERSHIP.reduce((n, g) => n + g.rows.filter((x) => x.holder).length, 0)} further members serve in the North and South district patrol blocks.{" "}

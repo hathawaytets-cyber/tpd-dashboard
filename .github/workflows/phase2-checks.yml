@@ -3,6 +3,8 @@ name: Phase 2 patrol development checks
 on:
   push:
     branches: [main, phase2-persistent-patrol, phase3-patrol-review, phase4-member-requests, phase5-training-records, phase6-clearance-personnel, phase7-command-reporting, phase8-release-hardening, feature-public-civilian-ridealongs]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -21,6 +23,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      - name: SQL tests (RLS and daily patrol evaluations, throwaway local PostgreSQL)
+        run: sudo PG_BIN="$(ls -d /usr/lib/postgresql/*/bin | sort -V | tail -1)" bash supabase/tests/run-as-nonroot.sh
       - name: Build static preview (no credentials)
         env:
           STATIC_EXPORT: '1'

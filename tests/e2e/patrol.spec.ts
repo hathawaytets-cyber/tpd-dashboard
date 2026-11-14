@@ -14,6 +14,12 @@ test("start, recover after reload, and end patrol with confirmation", async ({ p
   await expect(page.getByText("Patrol recovered")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Active patrol" })).toBeVisible();
 
+  // The notice is shown once per tab, not on every page load.
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Active patrol" })).toBeVisible();
+  await page.waitForTimeout(1500);
+  await expect(page.getByText("Patrol recovered")).toHaveCount(0);
+
   await page.getByRole("button", { name: "End patrol" }).first().click();
   const confirm = page.getByRole("dialog", { name: "End patrol?" });
   await expect(confirm).toBeVisible();

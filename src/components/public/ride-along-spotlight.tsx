@@ -8,7 +8,7 @@ export function RideAlongSpotlight() {
   <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
    <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
     <div>
-     <p className="text-2xs font-semibold uppercase tracking-widest text-gold-ink">Community · Civilian Ride-Alongs</p>
+     <p className="text-2xs font-semibold text-gold-ink">Civilian ride-alongs</p>
      <h2 id="ridealong-title" className="display mt-3 text-3xl font-bold tracking-tight">Experience a patrol shift</h2>
      <p className="mt-4 max-w-lg text-sm leading-relaxed text-ink-2">In Florida State Roleplay, civilians can request to observe a TPD patrol. Complete a copy of the application, open a Discord ticket, and await a supervisor’s decision.</p>
      <div className="mt-6 flex flex-wrap gap-3">

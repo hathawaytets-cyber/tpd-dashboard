@@ -123,13 +123,12 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
         run: () => setConfirmStart(true),
       });
     }
-    out.push({
+    if (ANCHORCAD_URL) out.push({
       id: "a-anchorcad",
       group: "Actions",
       label: "Open AnchorCAD",
       icon: ExternalLink,
       keywords: "report arrest citation incident cad",
-      disabled: ANCHORCAD_URL ? undefined : "Link not configured yet",
       external: true,
       run: () => (onClose(), window.open(ANCHORCAD_URL, "_blank", "noopener")),
     });

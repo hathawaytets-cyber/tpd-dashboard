@@ -60,7 +60,8 @@ export function PatrolProvider({ children }: { children: ReactNode }) {
     const t = setTimeout(() => {
       setRecovering(false);
       const s = recoveredFrom.current;
-      if (s) toast("info", "Patrol recovered", `Your ${s.district} District session from ${formatTime(s.start)} is still running.`);
+      // Tell the member once per browser tab, not on every full page load.
+      if (s && !alreadyNoticed(s.id)) toast("info", "Patrol recovered", `Your ${s.district} District session from ${formatTime(s.start)} is still running.`);
     }, 900);
     return () => clearTimeout(t);
   }, [recovering]);
@@ -173,4 +174,15 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
       <dd className="truncate text-xs font-semibold tabular">{value}</dd>
     </div>
   );
+}
+
+const NOTICE_KEY = "tpd-recovered-notice";
+
+/** True if this tab already announced the recovered session; records it otherwise. */
+function alreadyNoticed(sessionId: string): boolean {
+  try {
+    if (sessionStorage.getItem(NOTICE_KEY) === sessionId) return true;
+    sessionStorage.setItem(NOTICE_KEY, sessionId);
+  } catch {}
+  return false;
 }

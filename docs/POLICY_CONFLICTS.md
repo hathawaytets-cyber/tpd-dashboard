@@ -225,7 +225,61 @@ lists the same 13 active members as TPD Roster; Records has no entries.
 - **Current state:** Only roleplay names as written on the roster ("J. Quinellope"), call signs, ranks and appointments are stored. Discord IDs, Roblox usernames, timezones, hire dates and disciplinary points are never stored (enforced by a unit test that fails on any Discord-ID-shaped number in `src`).
 - **Leadership confirmation needed:** dede chooses whether names are shown (asked 2026-11-04).
 
-## I. Internal Affairs SOP (checked 2026-11-13)
+---
+
+## I. Daily Patrol Evaluation (added 2026-11-12)
+
+The Daily Patrol Evaluation replaces the TPD Daily Patrol Report Google Doc. dede approved
+the reporting model on 2026-11-12: recorded command assignments are the authoritative source
+of reporting days, and a qualifying completed patrol creates a reporting day only when no
+assignment exists. The HB does not mention a daily evaluation, so every rule below is an
+**Interim default** stored in `tpd.dpe_settings` (or in `lib/authz` for ranks), shown as
+"Interim, pending leadership" in the Command Center, and changeable without rewriting any
+submitted report.
+
+### PC-30 · Patrol length that creates a reporting day without an assignment — High
+- **Source:** None in HB. HB §6 covers activity logging, not supervisory reporting.
+- **Interim default:** 15 minutes of completed patrol on the patrol day (sessions summed). Never needed when command has assigned the day.
+- **Leadership confirmation needed:** Yes.
+
+### PC-31 · Who must file — High
+- **Source:** dede's directive (2026-11-12): "every active sergeant and lieutenant". HB §3 lists the ranks but gives no reporting duty.
+- **Interim default:** Current rank Sergeant or Lieutenant. Corporals, Captains and above do not file.
+- **Leadership confirmation needed:** Yes, in particular whether Corporals acting as supervisors file.
+
+### PC-32 · Patrol-day boundary and timezone — Low
+- **Interim default:** 04:00 to 04:00 America/New_York (DST-aware), approved as an interim setting by dede.
+- **Leadership confirmation needed:** Yes (low priority).
+
+### PC-33 · Deadline and late reports — Low
+- **Interim default:** 20:00 Tampa time the following day. Later reports are still accepted and marked late; nothing is issued automatically.
+- **Leadership confirmation needed:** Yes (low priority).
+
+### PC-34 · Who reviews, assigns and excuses — High
+- **Interim default:** Captain and above (`tpd.is_command()`, as PC-08). Nobody reviews or excuses their own report. Approved LOA (HB §5) excuses a day automatically.
+- **Leadership confirmation needed:** Yes, together with PC-08.
+
+### PC-35 · Award and medal approval — High
+- **Source:** The HB defines no awards or medals and no approval chain.
+- **Interim default:** A Captain or above endorses; the Office of the Chiefs (Chief, Deputy Chief, Assistant Chief) gives final approval, and the approver must differ from the endorser. The award list starts empty and is maintained by command; supervisors can also name an award in free text.
+- **Leadership confirmation needed:** Yes, including the official award list.
+
+### PC-36 · Who can be evaluated — Low
+- **Interim default:** Active Corporals, Senior Officers, Officers, Reserve Officers and Probationary Officers, department-wide (no district restriction, because patrol districts are not fixed per supervisor). Never the author.
+- **Leadership confirmation needed:** Yes, if evaluations should be limited to a supervisor's district or division.
+
+### PC-37 · Amendment window — Low
+- **Interim default:** The author may amend within 7 days of the patrol day, with a reason, until command marks the report reviewed. After that command can reopen it for one amendment. Every version is kept.
+- **Leadership confirmation needed:** Yes (low priority).
+
+### PC-38 · Relationship to discipline — Low
+- **Source:** HB §13 / §13.1 (Lieutenant+ may issue formal discipline).
+- **Interim default:** "Struggling / Needs Improvement" is a routine observation, not a disciplinary finding. Command can note it or refer it to the chain of command; discipline is issued only through the HB §13 process, never by this feature, and missed reports never trigger automatic action.
+- **Leadership confirmation needed:** No, unless leadership wants a direct link to the discipline record.
+
+---
+
+## J. Internal Affairs SOP (checked 2026-11-13)
 
 The IA SOP was read in full. The items it leaves open are listed as **IA-01 to IA-15** in
 [INTERNAL_AFFAIRS.md](INTERNAL_AFFAIRS.md#open-policy-questions-interim-behaviour-in-brackets), each with the interim

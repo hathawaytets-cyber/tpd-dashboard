@@ -133,3 +133,21 @@ Not done / blocked
 - IA-01 to IA-15 policy questions open; interim behaviour documented.
 - Roster Records tab entries are a confirmed manual task; the site never writes the roster sheet.
 - AnchorCAD read-only sync designed, not built (needs a key and approval).
+
+## Daily Patrol Evaluation · code complete, not applied or deployed (2026-11-12)
+
+Replaces the TPD Daily Patrol Report Google Doc. Plan approved by dede on 2026-11-12 ("Patrol log plus command assignment"). All reporting rules are interim and listed as PC-30 to PC-38.
+
+Done
+- Fixed the pre-existing RLS test failure (it still read the retired `personnel_directory` view; it now uses `list_member_directory()` and asserts the view is closed).
+- Migration `20261112000000_daily_patrol_evaluations.sql` (tpd schema only): settings, award list, assignments, obligations, excusals, reports, entries, append-only versions and reviews; SECURITY DEFINER RPCs for every write; SELECT-only RLS (author or Captain+; reviews command-only). `tpd.audit_log` is now append-only too.
+- Obligations: a command assignment always creates a reporting day; without one, 15+ minutes of completed patrol on the patrol day does (trigger on `patrol_sessions`). 04:00–04:00 America/New_York patrol day, deadline 20:00 the next day, DST-safe. Status is computed when read (Not started, Draft, Submitted, Overdue, Excused, plus Late), so reminders cannot duplicate and no scheduler is needed.
+- Supervisor page `/hq/evaluations`: date, filing supervisor and call sign from the signed-in profile; "No notable observations" plus Submit (two actions); officer search limited to eligible non-supervisory ranks with on-patrol officers first; the three form categories, justification, award from the list or free text; draft autosave; one report per day; amendments with a reason and full version history.
+- Reminders: Overview card, sidebar badge and notification-centre entries for due and overdue days (keyed per day).
+- Command Center → Evaluations (Captain+): compliance with status filter, per-supervisor table, assign patrol days, excuse and revoke with reasons; review with supervisor, category, review-status and officer filters, report sheet, mark reviewed, note or refer concerns, award endorsement and Office of the Chiefs final approval by a different person, reopen for amendment; CSV export (formula-safe, audited); award list and interim rules.
+- `lib/authz`: `evaluation.submit` (Sergeant, Lieutenant), `evaluation.review` (Captain+), `evaluation.award_final` (Office of the Chiefs). The server enforces the same rules independently.
+
+Limits
+- Patrol-based obligations depend on the live patrol workspace (`patrol_sessions`) being applied; command assignments work without it.
+- Concurrency is tested with sequential duplicate submissions and row locks, not true parallel sessions (no dblink locally).
+- Nothing is posted to Discord; notifications stay inside HQ.

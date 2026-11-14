@@ -60,8 +60,10 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
 do $$ begin
   assert (select count(*) from tpd.personnel) = 1, 'officer sees only self';
   assert (select discord_id from tpd.personnel) = '100000000000000002', 'own row';
+  -- The directory is served only by the audited RPC (migration 20261105071000 retired the view).
   assert (select count(*) from tpd.list_member_directory()) = 3, 'directory visible to members';
-  begin perform count(*) from tpd.personnel_directory; raise exception 'retired view readable'; exception when insufficient_privilege then null; end;
+  assert not exists (select 1 from pg_proc p, unnest(p.proargnames) a where p.proname = 'list_member_directory' and a in ('discord_id', 'timezone')), 'directory leaks identifiers';
+  begin perform count(*) from tpd.personnel_directory; raise exception 'retired directory view still readable'; exception when insufficient_privilege then null; end;
   assert not exists (select 1 from information_schema.columns where table_name = 'personnel_directory' and column_name in ('discord_id', 'timezone')), 'directory leaks identifiers';
   assert (select count(*) from tpd.roster_sync_runs) = 0, 'officer reads sync runs';
   assert (select count(*) from tpd.audit_log) = 0, 'officer reads audit';
