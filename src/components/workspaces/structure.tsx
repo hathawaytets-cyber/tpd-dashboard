@@ -144,7 +144,7 @@ function PositionTable({ title, subtitle, stars, rows, collapseVacant }: { title
               <th scope="col" className="w-24 px-4 py-2 font-semibold">
                 Call sign
               </th>
-              <th scope="col" className="px-3 py-2 font-semibold">
+              <th scope="col" className="hidden px-3 py-2 font-semibold sm:table-cell">
                 Rank
               </th>
               <th scope="col" className="px-3 py-2 font-semibold">
@@ -159,8 +159,11 @@ function PositionTable({ title, subtitle, stars, rows, collapseVacant }: { title
             {shown.map(({ pos, count, range }, i) => (
               <tr key={`${pos.callsign ?? "none"}-${i}`} className={cn(!pos.holder && "text-muted")}>
                 <td className="px-4 py-2 font-semibold whitespace-nowrap tabular">{range ?? pos.callsign ?? "—"}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{pos.rank}</td>
-                <td className="px-3 py-2">{pos.appointment}</td>
+                <td className="hidden px-3 py-2 whitespace-nowrap sm:table-cell">{pos.rank}</td>
+                <td className="px-3 py-2">
+                  <span className="block text-3xs text-muted sm:hidden">{pos.rank}</span>
+                  {pos.appointment}
+                </td>
                 <td className="px-3 py-2 whitespace-nowrap">{pos.holder ? <span className="font-semibold text-ink">{pos.holder}</span> : count > 1 ? `${count} vacant` : "Vacant"}</td>
               </tr>
             ))}

@@ -14,11 +14,11 @@ import { stateTone } from "@/lib/request-tone";
 
 const full = (t: number) => new Date(t).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
-export function sessionStatus(s: SessionRecord): { label: string; tone: "gold" | "info" | "amber" | "neutral" } {
+export function sessionStatus(s: SessionRecord): { label: string; tone: "gold" | "info" | "amber" | "quiet" } {
   if (s.end === null) return { label: "In progress", tone: "gold" };
   if (s.flag === "Correction pending") return { label: "Correction pending", tone: "info" };
   if (s.flag === "Needs review") return { label: "Capped · needs review", tone: "amber" };
-  return { label: "Recorded", tone: "neutral" };
+  return { label: "Recorded", tone: "quiet" };
 }
 
 /**

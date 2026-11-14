@@ -38,6 +38,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </nav>
           <div className="ml-auto flex items-center gap-1.5 md:ml-0">
             <ThemeButton />
+            <Link href="/report" className="hidden rounded-md px-3 py-2 text-xs font-semibold text-on-dark hover:bg-white/8 lg:block">
+              Report an officer
+            </Link>
             <span className="hidden sm:block">
               <ButtonLink href="/hq" size="sm" variant="gold">
                 Member portal
@@ -73,6 +76,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               ["/#divisions", "Divisions"],
               ["/#leadership", "Leadership"],
               ["/ride-alongs", "Civilian ride-alongs"],
+              ["/report", "Report an officer"],
+              ["/report/status", "Complaint status"],
             ]}
           />
           <FooterCol

@@ -19,6 +19,7 @@ import {
   UserRound,
   type LucideIcon,
 } from "lucide-react";
+import { useIaAccess } from "@/components/ia/use-ia";
 import { usePatrol } from "@/components/patrol/patrol-provider";
 import { Avatar } from "@/components/ui/identity";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const list = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const me = useMe();
+  const iaAccess = !!useIaAccess().access?.has_access;
   const live = useIsLive();
   const recentsState = usePreview((s) => s.recents);
   const patrolApi = usePatrol();
@@ -102,7 +104,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       onClose();
       router.push(href);
     };
-    const pages = PAGES.filter((p) => !p.capability || can(me.actor, p.capability));
+    const pages = PAGES.filter((p) => (p.gate !== "ia" || iaAccess) && (!p.capability || can(me.actor, p.capability)));
     const out: Entry[] = [];
 
     // Actions
@@ -121,13 +123,12 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
         run: () => setConfirmStart(true),
       });
     }
-    out.push({
+    if (ANCHORCAD_URL) out.push({
       id: "a-anchorcad",
       group: "Actions",
       label: "Open AnchorCAD",
       icon: ExternalLink,
       keywords: "report arrest citation incident cad",
-      disabled: ANCHORCAD_URL ? undefined : "Link not configured yet",
       external: true,
       run: () => (onClose(), window.open(ANCHORCAD_URL, "_blank", "noopener")),
     });
@@ -151,14 +152,14 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       out.push({ id: `r-${r}`, group: "Preview", label: `Preview as ${ROLE_PERSONA[r].label}`, hint: ROLE_PERSONA[r].description, icon: UserRound, keywords: "role persona switch", run: () => (setRole(r), onClose()) });
     }
     return out;
-  }, [me, live, patrolApi, router, onClose, openNewRequest, openShortcuts]);
+  }, [me, live, patrolApi, router, onClose, openNewRequest, openShortcuts, iaAccess]);
 
   const results = useMemo(() => {
     const query = q.trim();
     if (!query) {
       const recent: Entry[] = (recentsState ?? [])
         .map((href) => PAGES.find((p) => p.href === href))
-        .filter((p): p is (typeof PAGES)[number] => !!p && (!p.capability || (!!me && can(me.actor, p.capability))))
+        .filter((p): p is (typeof PAGES)[number] => !!p && (p.gate !== "ia" || iaAccess) && (!p.capability || (!!me && can(me.actor, p.capability))))
         .slice(0, 4)
         .map((p) => ({ id: `rc-${p.href}`, group: "Recent", label: p.label, icon: History, run: () => (onClose(), router.push(p.href)) }));
       const top = entries.filter((e) => e.group === "Actions").slice(0, 6);
@@ -171,7 +172,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       .sort((a, b) => GROUP_ORDER.indexOf(a.e.group) - GROUP_ORDER.indexOf(b.e.group) || b.s - a.s)
       .map((x) => x.e)
       .slice(0, 40);
-  }, [q, entries, recentsState, me, onClose, router]);
+  }, [q, entries, recentsState, me, onClose, router, iaAccess]);
 
   const selectable = results.filter((r) => !r.disabled);
   const current = selectable[Math.min(active, selectable.length - 1)];

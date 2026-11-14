@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, ExternalLink, ShieldCheck } from "lucide-react";
+import { Check, ChevronDown, ExternalLink, ShieldCheck } from "lucide-react";
 import { AdminDialog, ADMIN_ACTIONS, type AdminAction } from "./admin-dialog";
 import { Button } from "@/components/ui/button";
 import { BarChart, HourMeter } from "@/components/ui/data-viz";
@@ -18,7 +18,7 @@ import { memberById, type PreviewState } from "@/lib/preview/store";
 import { stateTone } from "@/lib/request-tone";
 import { VEHICLES, vehicleAuthorized, type Member } from "@/lib/sample-data";
 
-export const STATUS_TONE: Record<Member["status"], Tone> = { Active: "green", "On leave": "gold", Probationary: "info", Suspended: "red" };
+export const STATUS_TONE: Record<Member["status"], Tone> = { Active: "quiet", "On leave": "gold", Probationary: "info", Suspended: "red" };
 
 export function ProfileHeader({ member, state, now, as: H = "h2" }: { member: Member; state: PreviewState; now: number; as?: "h1" | "h2" }) {
   const live = state.sessions.find((s) => s.memberId === member.id && s.end === null);
@@ -114,7 +114,11 @@ export function ProfileBody({ member, state, now, full }: { member: Member; stat
             return (
               <li key={v.name} className={cn("flex items-center justify-between text-xs", !ok && "text-muted")}>
                 <span>{v.name}</span>
-                {ok ? <Pill tone="green">Yes</Pill> : <span className="text-3xs">{v.minRank}+</span>}
+                {ok ? (
+                  <span className="inline-flex items-center gap-1 text-3xs font-medium text-muted">
+                    <Check className="size-3 text-green" aria-hidden /> Yes
+                  </span>
+                ) : <span className="text-3xs">{v.minRank}+</span>}
               </li>
             );
           })}

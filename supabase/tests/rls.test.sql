@@ -60,7 +60,10 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
 do $$ begin
   assert (select count(*) from tpd.personnel) = 1, 'officer sees only self';
   assert (select discord_id from tpd.personnel) = '100000000000000002', 'own row';
-  assert (select count(*) from tpd.personnel_directory) = 3, 'directory visible to members';
+  -- The directory is served only by the audited RPC (migration 20261105071000 retired the view).
+  assert (select count(*) from tpd.list_member_directory()) = 3, 'directory visible to members';
+  assert not exists (select 1 from pg_proc p, unnest(p.proargnames) a where p.proname = 'list_member_directory' and a in ('discord_id', 'timezone')), 'directory leaks identifiers';
+  begin perform count(*) from tpd.personnel_directory; raise exception 'retired directory view still readable'; exception when insufficient_privilege then null; end;
   assert not exists (select 1 from information_schema.columns where table_name = 'personnel_directory' and column_name in ('discord_id', 'timezone')), 'directory leaks identifiers';
   assert (select count(*) from tpd.roster_sync_runs) = 0, 'officer reads sync runs';
   assert (select count(*) from tpd.audit_log) = 0, 'officer reads audit';
@@ -90,7 +93,7 @@ end $$;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
 do $$ begin
   assert (tpd.my_membership() ->> 'state') = 'unrecognized', 'stranger state';
-  assert (select count(*) from tpd.personnel_directory) = 0, 'stranger reads directory';
+  begin perform count(*) from tpd.list_member_directory(); raise exception 'stranger reads directory'; exception when insufficient_privilege then null; end;
   assert (select count(*) from tpd.positions) = 0, 'stranger reads positions';
 end $$;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000d');
@@ -203,7 +206,7 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000e');
 do $$ begin
   assert (tpd.my_membership() ->> 'state') = 'former', 'former state';
   assert not tpd.is_active_member(), 'former is not active';
-  assert (select count(*) from tpd.personnel_directory) = 0, 'former reads directory';
+  begin perform count(*) from tpd.list_member_directory(); raise exception 'former reads directory'; exception when insufficient_privilege then null; end;
 end $$;
 reset role;
 

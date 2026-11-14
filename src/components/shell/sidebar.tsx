@@ -24,6 +24,7 @@ import { Badge, Avatar, RankMark } from "@/components/ui/identity";
 import { MenuItem, MenuLabel, MenuSeparator, Popover, Tooltip } from "@/components/ui/menu";
 import { Dot } from "@/components/ui/status";
 import { Skeleton, toast } from "@/components/ui/feedback";
+import { EvaluationNavBadge } from "@/components/evaluations/reminders";
 import { usePatrol } from "@/components/patrol/patrol-provider";
 import { can } from "@/lib/authz";
 import { useAuth, useIsLive } from "@/lib/backend/auth";
@@ -31,6 +32,7 @@ import { cn } from "@/lib/cn";
 import { formatClock } from "@/lib/domain/activity";
 import { useMe, useNow } from "@/lib/preview/hooks";
 import { resetPreview, ROLE_PERSONA, setRole, type PreviewRole } from "@/lib/preview/store";
+import { useIaAccess } from "@/components/ia/use-ia";
 import { FOOTER_NAV, NAV, type NavLeaf } from "./nav-config";
 import { useShell } from "./shell-context";
 import { setTheme, useTheme } from "./theme";
@@ -44,6 +46,7 @@ export function Sidebar({ collapsed, onNavigate }: { collapsed: boolean; onNavig
   const { toggleCollapsed } = useShell();
   const me = useMe();
   const pathname = usePathname();
+  const iaAccess = !!useIaAccess().access?.has_access;
 
   return (
     <div className="flex h-full flex-col bg-obsidian text-on-dark">
@@ -53,14 +56,14 @@ export function Sidebar({ collapsed, onNavigate }: { collapsed: boolean; onNavig
 
       <nav aria-label="Headquarters" className="scrollbar-thin flex-1 overflow-y-auto px-2.5 pb-3">
         {NAV.map((group) => {
-          const items = group.items.filter((i) => !i.capability || (me && can(me.actor, i.capability)));
+          const items = group.items.filter((i) => (i.gate !== "ia" || iaAccess) && (!i.capability || (me && can(me.actor, i.capability))));
           if (!items.length) return null;
           return (
             <div key={group.label} className="mt-4 first:mt-1">
               {collapsed ? (
                 <div aria-hidden className="mx-2 mb-2 h-px bg-dark-line" />
               ) : (
-                <p className="px-2.5 pb-1.5 text-3xs font-semibold tracking-wide text-on-dark-muted/80 uppercase">{group.label}</p>
+                <p className="px-2.5 pb-1.5 text-3xs font-semibold text-on-dark-muted/80">{group.label}</p>
               )}
               <ul className="flex flex-col gap-0.5">
                 {items.map((item) => (
@@ -228,7 +231,8 @@ function NavItem({ item, pathname, collapsed, onNavigate }: { item: NavLeaf; pat
       {active ? <span aria-hidden className="absolute -left-2.5 top-2 bottom-2 w-[3px] rounded-r-full bg-gold" /> : null}
       {Icon ? <Icon aria-hidden className={cn("size-[17px] shrink-0", active ? "text-gold" : "")} /> : null}
       {collapsed ? null : <span className="truncate">{item.label}</span>}
-      {!collapsed && item.shortcut ? (
+      {item.href === "/hq/evaluations" ? <EvaluationNavBadge collapsed={collapsed} /> : null}
+      {!collapsed && item.shortcut && item.href !== "/hq/evaluations" ? (
         <span className="ml-auto hidden text-3xs tracking-wider text-on-dark-muted/60 opacity-0 transition-opacity group-hover:opacity-100 xl:inline">{item.shortcut}</span>
       ) : null}
     </Link>
@@ -294,7 +298,11 @@ function SideButton({ collapsed, label, hint, onClick, children }: { collapsed: 
       {collapsed ? null : (
         <>
           <span>{label}</span>
-          {hint ? <span className="ml-auto text-3xs text-on-dark-muted/60">{hint}</span> : null}
+          {hint ? (
+            <kbd aria-hidden className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-xs border border-dark-line bg-white/5 px-1 font-sans text-3xs font-semibold text-on-dark-muted">
+              {hint}
+            </kbd>
+          ) : null}
         </>
       )}
     </button>

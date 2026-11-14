@@ -32,7 +32,7 @@ export function ActivityWorkspace() {
         meta={
           <>
             <Pill tone={exempt ? "gold" : week >= REQUIRED_MINUTES ? "green" : "neutral"}>{exempt ? "Exempt this week" : `${formatMinutes(week)} of 3h`}</Pill>
-            <Pill tone="amber">Week boundary is interim (PC-14)</Pill>
+            <span className="text-3xs text-muted">Week runs Monday to Sunday, Tampa time (interim)</span>
           </>
         }
       />

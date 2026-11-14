@@ -61,10 +61,10 @@ server-side check; signed-in users have no write grants on any table.
 | # | Item | Where |
 |---|------|-------|
 | 1 | Create a Supabase project. Run `supabase link`, `supabase db push` (migrations), then `supabase functions deploy roster-sync discord-verify integration-health`. | supabase.com |
-| 2 | Create a Discord application. Add the redirect `https://<project-ref>.supabase.co/auth/v1/callback`. In Supabase Auth → Providers → Discord, paste the client ID and secret. In Auth → URL configuration, add `https://dedeworld9-cmd.github.io/tpd-dashboard/hq/auth/callback/` to the redirect allow list. | discord.com/developers, Supabase |
+| 2 | Create a Discord application. Add the redirect `https://<project-ref>.supabase.co/auth/v1/callback`. In Supabase Auth → Providers → Discord, paste the client ID and secret. In Auth → URL configuration, add `https://hathawaytets-cyber.github.io/tpd-dashboard/hq/auth/callback/` to the redirect allow list. | discord.com/developers, Supabase |
 | 3 | Set `DISCORD_GUILD_ID` (the TPD server ID) as a function secret. No bot is needed. | Supabase |
 | 4 | Create a Google Cloud service account with the Sheets API enabled. Share the roster sheet with its email as **Viewer**. Set `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS` (the JSON) and `GOOGLE_SHEETS_ID`. | Google Cloud |
-| 5 | Set `ROSTER_SYNC_SECRET` and `ALLOWED_ORIGINS=https://dedeworld9-cmd.github.io`. Then run `supabase/sql/schedule-roster-sync.sql`. | Supabase |
+| 5 | Set `ROSTER_SYNC_SECRET` and `ALLOWED_ORIGINS=https://hathawaytets-cyber.github.io`. Then run `supabase/sql/schedule-roster-sync.sql`. | Supabase |
 | 6 | Optional: create an AnchorCAD API key with `server:read` only (Dashboard → Config → Developer API). Set `ANCHORCAD_API_KEY` and `ANCHORCAD_PANEL_URL`. | AnchorCAD |
 | 7 | Build the site with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `NEXT_PUBLIC_ANCHORCAD_URL`. All three are public by design. Deploying needs dede's approval. | build env |
 | 8 | First run: a Captain+ member signs in. Then open Command Center → Integrations, click **Run health checks**, then **Preview sync**, then **Apply**. | the site |
@@ -112,3 +112,30 @@ None of these tests talks to the real Discord, Google, Supabase or AnchorCAD; th
 2. Redeploy `discord-verify`, `integration-health` (fix: command users were matched against the first personnel row instead of their own; authenticates before anything else) and `roster-sync` (truncation guard; dry run with the sync secret). Deploy the new code BEFORE turning Verify JWT OFF for `discord-verify` and `integration-health`: the new code authenticates first, the old `discord-verify` did not.
 3. Missing secrets: `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`, `ROSTER_SYNC_SECRET`. Then the scheduler SQL.
 4. Rebuild and deploy the site (needs approval).
+
+## AnchorCAD (2026-11-13)
+
+Official community: `https://anchr.gg/join?communityid=vcfsrp`. A join link lets a member ask to join the community
+inside AnchorCAD; it is **not** API access and gives this site no right to read CAD data.
+
+- **Implemented: launch-and-reference.** `/hq/cad` explains how to join, links the community and (when
+  `NEXT_PUBLIC_ANCHORCAD_URL` is set to an official host) the panel. Internal Affairs logs AnchorCAD records as
+  references (record number or link); nothing is imported, scraped or displayed from CAD.
+- **API facts (docs.anchr.gg, read 2026-11-13).** Base `https://anchorcad.xyz/api/v1`, header `x-api-key`, keys are
+  panel-bound and scoped, about 120 requests/minute per IP. Endpoints cover members, civilians, dispatch, units,
+  departments and read-only records (incidents, warrants, citations). There are **no** evidence or bodycam endpoints,
+  **no** OAuth or account linking, **no** webhooks, and response fields are undocumented. The terms forbid
+  circumventing access controls.
+- **Not activated: read-only sync (proposal).** If command wants record lookups later: a panel owner issues a key limited to
+  read-only scopes (records and server info), stored solely as the `ANCHORCAD_API_KEY` Edge Function secret; an Edge
+  Function looks up a record number on demand for an authorized IA user and stores only the reference and a
+  verification timestamp. AnchorCAD stays the system of record. Needs dede's approval, the key, and verified response
+  shapes before any code reads records.
+
+## Daily Patrol Evaluation activation (not applied; needs dede's approval)
+Nothing below has been run against the live project.
+1. Confirm the earlier migrations are applied on the live project, in filename order. The evaluation migration needs `tpd.personnel`, `tpd.audit_log`, `tpd.patrol_sessions`, `tpd.member_requests`, `tpd.is_command()` and `tpd.is_active_member()`. Check with `select to_regclass('tpd.patrol_sessions'), to_regclass('tpd.member_requests'), to_regprocedure('tpd.list_member_directory()');` and apply any that are missing first.
+2. Apply `supabase/migrations/20261112000000_daily_patrol_evaluations.sql` (tpd schema only; it does not touch `public` or any District Five table). It makes `tpd.audit_log` append-only.
+3. Have a Captain or above enter the official award list (Command Center → Evaluations → Awards and rules), or leave it empty so supervisors name awards in free text (PC-35).
+4. Assign patrol days to Sergeants and Lieutenants (Compliance → Assign patrol days). Optionally run `select tpd.dpe_refresh_obligations('<from>', '<to>');` as a Captain+ to create obligations from patrols already logged.
+5. Rebuild and deploy the site (needs approval). The settings stay labelled interim until leadership answers PC-30 to PC-38.

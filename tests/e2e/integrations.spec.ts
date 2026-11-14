@@ -58,7 +58,8 @@ test.describe("with a backend (stubbed)", () => {
     await page.route("https://fakeproj.supabase.co/**", (route) => {
       const url = route.request().url();
       if (url.includes("/rest/v1/rpc/my_membership")) return route.fulfill({ status, contentType: "application/json", body: JSON.stringify(membership) });
-      if (url.includes("/rest/v1/personnel_directory")) return route.fulfill({ status: extra.directoryStatus ?? 200, contentType: "application/json", body: JSON.stringify(extra.directoryStatus ? { message: "boom" } : directory) });
+      // The directory is the list_member_directory RPC (the personnel_directory view was retired in 20261105071000).
+      if (url.includes("/rest/v1/rpc/list_member_directory")) return route.fulfill({ status: extra.directoryStatus ?? 200, contentType: "application/json", body: JSON.stringify(extra.directoryStatus ? { message: "boom" } : directory) });
       if (url.includes("/rest/v1/division_slots")) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{ personnel_id: member.id, division_slug: "waterfront" }]) });
       if (url.includes("/auth/v1/user")) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(session.user) });
       return route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
@@ -126,12 +127,15 @@ test.describe("with a backend (stubbed)", () => {
     await expect(page.getByRole("cell", { name: /A\. Example/ })).toBeVisible();
   });
 
-  test("workspaces without a server record stay closed", async ({ page }) => {
+  // Every workspace now has a server record (patrol, requests, training, supervisor reviews), so none shows the
+  // "not connected" page any more. What must still hold: live mode never falls back to the browser-local demo store.
+  test("live workspaces never fall back to demo data or the browser-local store", async ({ page }) => {
     await as(page, { state: "verified", member });
-    for (const [path, area] of [["/hq/patrol", "Patrol"], ["/hq/requests", "Requests"], ["/hq/activity", "Activity"], ["/hq/training", "Training"], ["/hq/supervisor", "Supervisor desk"]]) {
+    for (const path of ["/hq/patrol", "/hq/requests", "/hq/activity", "/hq/training", "/hq/supervisor"]) {
       await page.goto(path);
-      await expect(page.getByRole("heading", { level: 1, name: `${area} is not connected yet` })).toBeVisible();
-      await expect(page.getByRole("button", { name: /Start patrol/ })).toHaveCount(0);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Sign in to Headquarters" })).toHaveCount(0);
+      await noDemo(page);
     }
     await expect(page.evaluate(() => localStorage.getItem("tpd-preview-state"))).resolves.toBeNull();
   });
@@ -207,10 +211,11 @@ test.describe("with a backend (stubbed)", () => {
     await expect(page.getByRole("navigation", { name: "Quick navigation" })).toHaveCount(0);
   });
 
-  test("Command Center: an officer is refused, a Captain sees roster staffing only", async ({ page }) => {
+  test("Command Center: an officer is refused, a Captain gets in without demo data", async ({ page }) => {
     await as(page, { state: "verified", member });
     await page.goto("/hq/command");
-    await expect(page.getByText("Command Center is restricted")).toBeVisible();
+    await expect(page.getByText("Access restricted")).toBeVisible();
+    await expect(page.getByText("Captain+ authorization required.")).toBeVisible();
     await expect(page.getByRole("link", { name: "Command Center" })).toHaveCount(0);
     await page.goto("/hq/command/integrations");
     await expect(page.getByText("Command access required")).toBeVisible();
@@ -218,7 +223,8 @@ test.describe("with a backend (stubbed)", () => {
     await as(page, { state: "verified", member: { ...member, id: directory[1].id, name: "B. Captain", rank: "Captain", callsign: "X-309", district: null } });
     await page.goto("/hq/command");
     await expect(page.getByRole("heading", { level: 1, name: "Command Center" })).toBeVisible();
-    await expect(page.getByText("Compliance and decisions are not connected yet")).toBeVisible();
+    // The report itself comes from tpd.command_operational_report (stubbed empty here); the page must not invent figures.
+    await expect(page.getByText("Access restricted")).toHaveCount(0);
     await noDemo(page);
     await page.goto("/hq/command/integrations");
     await expect(page.getByRole("button", { name: "Run health checks" })).toBeVisible();

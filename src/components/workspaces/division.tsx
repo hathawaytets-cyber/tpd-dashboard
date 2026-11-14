@@ -143,7 +143,7 @@ export function DivisionWorkspace({ slug }: { slug: string }) {
             <ul className="flex flex-col gap-2 border-t border-line px-4 py-3.5 text-2xs text-ink-2">
               <li>Members may hold up to three subdivisions at once, at any rank.</li>
               <li>Divisions don’t set their own activity quotas; the department-wide 3 hours applies.</li>
-              <li className="text-muted">Branch: {division.branch ?? "not assigned in the sources yet (PC-07)"}</li>
+              <li className="text-muted">Branch: {division.branch ?? "Not yet assigned"}</li>
             </ul>
           </Card>
         </div>
