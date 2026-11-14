@@ -115,6 +115,8 @@ Not deployed: the live preview does not include Phase 2.
 
 ## Internal Affairs and AnchorCAD · code complete, not deployed (2026-11-13)
 
+2026-11-14: validated on a real Supabase staging stack (172/172 checks, 8 real-backend browser tests); three defects fixed. Verdict, decision matrix and the production plan: [IA_RELEASE.md](IA_RELEASE.md). Still not applied live or deployed.
+
 Branch `feature/internal-affairs-anchorcad`. Details: [INTERNAL_AFFAIRS.md](INTERNAL_AFFAIRS.md), AnchorCAD section of
 [INTEGRATIONS.md](INTEGRATIONS.md).
 

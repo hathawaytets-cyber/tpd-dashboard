@@ -4,6 +4,8 @@ Source of truth: the TPD Internal Affairs SOP (Google Doc `1EIHNewZ80A-nNMFIyF04
 Where the SOP is silent, the interim choice is listed under "Open policy questions" (IA-01 …) and in
 [POLICY_CONFLICTS.md](POLICY_CONFLICTS.md) section I. None of these is presented as TPD policy.
 
+Release readiness, staging results, the decision matrix and the deployment plan: [IA_RELEASE.md](IA_RELEASE.md).
+
 Status (2026-11-13): code complete on branch `feature/internal-affairs-anchorcad`. **Not deployed, not applied to the
 live Supabase project, no secrets set.** The public form says "not connected" until the steps below are done.
 
@@ -48,9 +50,11 @@ live Supabase project, no secrets set.** The public form says "not connected" un
 
 1. **Intake** (§4): complaint arrives → case `intake`, bodycam preservation task due same day (24 h, capped at incident
    + 7 days), evidence preservation task due 48 h, alert to Director and Deputy Director.
-2. **Routing** (§5): handler is chosen from the accused: IA member → Director only; Director → Deputy Chief;
-   Deputy Chief → Chief; Chief → recorded as an external referral by the Deputy Chief. The accused and a member
-   complainant are always excluded from their own case.
+2. **Routing** (§5): handler is chosen from the accused: IA member → Director only; Director or Major X-201 → Deputy
+   Chief; Deputy Chief → Chief; Chief → recorded as an external referral by the Deputy Chief. The accused and a member
+   complainant are always excluded from their own case. A public complaint cannot link a member, so the officer named
+   in the free text is matched against IA staff and the oversight posts at intake: anyone matched is excluded and the
+   case starts at the narrowest handler a match needs, until the higher authority links the verified member.
 3. **Intake review → assign** (§5): lead links the verified member, assigns an investigator. The database refuses an
    assignee who is the accused, the complainant, or has declared a conflict. Due = 7 days (§6).
 4. **Investigate** (§6, §7): notice to the member or a recorded reason to delay; evidence and AnchorCAD references;
@@ -92,7 +96,7 @@ live Supabase project, no secrets set.** The public form says "not connected" un
 - **IA-06** What may a complainant learn? [Received / under review / closed, plus a statement the Deputy Chief approves.]
 - **IA-07** Complaint against the Chief: who investigates? [Deputy Chief records an external referral only.]
 - **IA-08** Do escalated cases (handled by the Deputy Chief or Chief) need Director review? [No.]
-- **IA-09** Complaint against the Major X-201, who oversees IA? [Handled by IA; the Major is excluded from the case.]
+- **IA-09** Complaint against the Major X-201, who oversees IA? [Handled by the Deputy Chief, like a complaint against the Director: IA reports to the Major (§2) and §5 bars investigating your own supervisor. Changed 2026-11-14.]
 - **IA-10** Exact Garrity warning text. [Not in the SOP; recorded as an attestation that it was given.]
 - **IA-11** Discipline list and points. [HB §13 ladder: Infraction, Strike, Blackmark, Suspension, Demotion, Termination; no points are computed.]
 - **IA-12** Can intake be closed without findings (e.g. out of scope)? [No; every case reaches findings or an external referral.]

@@ -411,6 +411,54 @@ do $$ begin
 end $$;
 reset role;
 
+-- 9b. Confidential routing (IA §5, §11): a public complaint naming IA staff or an oversight post in free text
+-- is hidden from the people named and starts at the narrowest handler, before anyone links a member.
+set role service_role;
+do $$ declare r jsonb; begin
+  r := tpd.ia_intake_submit(jsonb_build_object('category', 'dishonesty', 'summary', 'Director misled me', 'officer', 'IA-01 (the IA director)',
+        'description', 'Public complaint that names the IA Director by call sign only.'), pg_temp.key(40), null, pg_temp.tok('tx-dir'));
+  insert into ids values ('tx_dir', (r ->> 'case_id')::uuid);
+  r := tpd.ia_intake_submit(jsonb_build_object('category', 'public_conduct', 'summary', 'Rude command officer', 'officer', 'x-201',
+        'description', 'Public complaint that names the Major over Administrative Operations.'), pg_temp.key(41), null, pg_temp.tok('tx-major'));
+  insert into ids values ('tx_major', (r ->> 'case_id')::uuid);
+  r := tpd.ia_intake_submit(jsonb_build_object('category', 'public_conduct', 'summary', 'Unprofessional', 'officer', 'Investigator, badge unknown',
+        'description', 'Public complaint that names an IA investigator by surname.'), pg_temp.key(42), null, pg_temp.tok('tx-inv'));
+  insert into ids values ('tx_inv', (r ->> 'case_id')::uuid);
+  r := tpd.ia_intake_submit(jsonb_build_object('category', 'public_conduct', 'summary', 'Rude at a stop', 'officer', 'Officer Directorson',
+        'description', 'A name that merely contains a staff surname must not match.'), pg_temp.key(43), null, pg_temp.tok('tx-none'));
+  insert into ids values ('tx_none', (r ->> 'case_id')::uuid);
+end $$;
+reset role;
+do $$ begin
+  assert (select handler = 'deputy_chief' and routing_basis = 'text_match' and pg_temp.id('pd') = any (provisional_excluded) from tt.ia_cases where id = pg_temp.id('tx_dir')), 'Director named in text: routed to the Deputy Chief, Director excluded';
+  assert not pg_temp.sees('d', 'tx_dir') and not pg_temp.sees('e', 'tx_dir') and not pg_temp.sees('f', 'tx_dir') and not pg_temp.sees('c', 'tx_dir'), 'Director-named complaint hidden from IA and the Major';
+  assert pg_temp.sees('b', 'tx_dir') and pg_temp.sees('a', 'tx_dir'), 'Director-named complaint visible to the Deputy Chief and Chief';
+  assert not exists (select 1 from tpd.ia_notifications where case_id = pg_temp.id('tx_dir') and recipient_id = pg_temp.id('pd')), 'named Director not alerted';
+  assert exists (select 1 from tpd.ia_notifications where case_id = pg_temp.id('tx_dir') and recipient_id = pg_temp.id('pb')), 'Deputy Chief alerted';
+  assert (select handler = 'deputy_chief' and pg_temp.id('pc') = any (provisional_excluded) from tt.ia_cases where id = pg_temp.id('tx_major')), 'Major named: Deputy Chief handles it (IA-09, IA §5), Major excluded';
+  assert not pg_temp.sees('c', 'tx_major') and not pg_temp.sees('d', 'tx_major') and pg_temp.sees('b', 'tx_major'), 'Major-named complaint hidden from the Major and IA staff';
+  assert (select handler = 'ia_director' and pg_temp.id('pf') = any (provisional_excluded) from tt.ia_cases where id = pg_temp.id('tx_inv')), 'investigator named by surname: Director handles it';
+  assert not pg_temp.sees('f', 'tx_inv') and not pg_temp.sees('e', 'tx_inv') and pg_temp.sees('d', 'tx_inv'), 'named investigator and other IA staff excluded';
+  assert (select handler = 'ia' and routing_basis = 'none' and provisional_excluded = '{}' from tt.ia_cases where id = pg_temp.id('tx_none')), 'partial-word names do not match';
+end $$;
+set role authenticated;
+-- The provisional lead links the verified member; text exclusions give way and the case widens to normal IA handling.
+select pg_temp.as_user('d');
+do $$ begin
+  assert pg_temp.fails(format('select tpd.ia_accept_intake(%L, %L, %L)', pg_temp.id('tx_dir'), pg_temp.id('ph'), 'Excluded Director tries to accept'), '%lead%'), 'excluded Director cannot act on the case';
+end $$;
+select pg_temp.as_user('b');
+do $$ begin
+  perform tpd.ia_accept_intake(pg_temp.id('tx_dir'), pg_temp.id('ph'), 'Reviewed: the officer involved is X-422, not the Director.');
+  perform tpd.ia_accept_intake(pg_temp.id('tx_major'), null, 'No member identified yet; keep the Major out of the file.');
+end $$;
+reset role;
+do $$ begin
+  assert (select handler = 'ia' and routing_basis = 'verified' and provisional_excluded = '{}' and accused_id = pg_temp.id('ph') from tt.ia_cases where id = pg_temp.id('tx_dir')), 'verified link clears provisional routing';
+  assert pg_temp.sees('d', 'tx_dir') and not pg_temp.sees('h', 'tx_dir'), 'Director now sees it; the verified accused does not';
+  assert not pg_temp.sees('c', 'tx_major'), 'without a verified link the Major stays excluded';
+end $$;
+
 -- 10. Notifications carry no case content, and nothing reaches tpd.audit_log.
 do $$ begin
   assert not exists (select 1 from information_schema.columns where table_schema = 'tpd' and table_name = 'ia_notifications' and column_name in ('summary', 'body', 'message', 'detail')), 'notifications have no content column';

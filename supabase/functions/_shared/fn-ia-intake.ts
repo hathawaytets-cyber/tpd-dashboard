@@ -43,19 +43,25 @@ const MAX_JSON_BYTES = 48 * 1024;
 
 const GENERIC = "We could not accept this complaint. Check the highlighted fields and try again.";
 
-/** Calls a service-only RPC and returns status + parsed body (the shared client hides error codes). */
-export async function serviceRpc(env: Env, fn: string, args: Record<string, unknown>) {
+/**
+ * Calls a service-only RPC and returns status + parsed body. Plain fetch on purpose: fetchWithRetry turns a 429/5xx
+ * into a thrown UpstreamError, which would hide the database's rate-limit answer behind a generic 500
+ * (found on the staging stack, 2026-11-14). The database raises SQLSTATE PT429, which PostgREST returns as HTTP 429.
+ */
+export async function serviceRpc(env: Env, fn: string, args: Record<string, unknown>, fetchImpl: typeof fetch = fetch) {
   const url = env.get("SUPABASE_URL")!;
   const key = env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const res = await fetchWithRetry(
-    `${url}/rest/v1/rpc/${fn}`,
-    {
+  let res: Response;
+  try {
+    res = await fetchImpl(`${url}/rest/v1/rpc/${fn}`, {
       method: "POST",
       headers: { apikey: key, authorization: `Bearer ${key}`, "content-type": "application/json", "content-profile": DB_SCHEMA, "accept-profile": DB_SCHEMA },
       body: JSON.stringify(args),
-    },
-    { attempts: 1 },
-  );
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch {
+    return { status: 0, body: null };
+  }
   const text = await res.text();
   let body: unknown = null;
   try {
@@ -65,6 +71,10 @@ export async function serviceRpc(env: Env, fn: string, args: Record<string, unkn
   }
   return { status: res.status, body: body as Record<string, unknown> | null };
 }
+
+/** The database's rate-limit answer: HTTP 429 / SQLSTATE PT429 (P0429 accepted for older deployments). */
+export const isRateLimited = (r: { status: number; body: Record<string, unknown> | null }) =>
+  r.status === 429 || r.body?.code === "PT429" || r.body?.code === "P0429" || String(r.body?.message ?? "") === "rate_limited";
 
 export function callerAddress(req: Request): string {
   return req.headers.get("cf-connecting-ip") ?? req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -157,7 +167,7 @@ export function iaIntakeHandler(env: Env) {
         const token = typeof payload.token === "string" ? payload.token.trim() : "";
         if (!REFERENCE_PATTERN.test(reference) || !TOKEN_PATTERN.test(token)) return json({ found: false }, 200, h);
         const r = await serviceRpc(env, "ia_receipt_status", { p_reference: reference, p_token_hash: bytea(await sha256Bytes(token)), p_client_key: key });
-        if (r.body?.code === "P0429" || String(r.body?.message ?? "").includes("rate_limited")) throw new HttpError(429, "Too many lookups. Try again in an hour.");
+        if (isRateLimited(r)) throw new HttpError(429, "Too many lookups. Try again in an hour.");
         if (r.status !== 200 || !r.body) throw new HttpError(502, "The status could not be checked right now.");
         return json(r.body, 200, h);
       }
@@ -194,7 +204,7 @@ export function iaIntakeHandler(env: Env) {
 
       const token = newTrackingToken();
       const r = await serviceRpc(env, "ia_intake_submit", { p: body, p_client_key: key, p_user: userId, p_token_hash: bytea(await sha256Bytes(token)) });
-      if (r.body?.code === "P0429" || String(r.body?.message ?? "").includes("rate_limited")) throw new HttpError(429, "Too many complaints from this connection. Try again later.");
+      if (isRateLimited(r)) throw new HttpError(429, "Too many complaints from this connection. Try again later.");
       if (r.status === 400 && r.body?.code === "22023") return json({ error: GENERIC }, 400, h);
       if (r.status !== 200 || !r.body?.reference || !r.body?.case_id) throw new HttpError(502, "Your complaint could not be saved. Nothing was submitted; please try again.");
       const caseId = String(r.body.case_id);

@@ -177,9 +177,15 @@ describe("ia-intake", () => {
   });
 
   it("maps the database rate limit to 429 and hides database messages", async () => {
-    rpcResult = () => ok({ code: "P0429", message: "rate_limited" }, 400);
+    // What PostgREST really answers (verified on the staging stack): SQLSTATE PT429 -> HTTP 429. The older
+    // P0429 code came back as HTTP 500, which fetchWithRetry turned into a generic "could not be saved" 500.
+    rpcResult = () => ok({ code: "PT429", message: "rate_limited" }, 429);
     const res = await h()(post(complaint()));
     expect(res.status).toBe(429);
+    rpcResult = () => ok({ code: "P0429", message: "rate_limited" }, 500);
+    expect((await h()(post(complaint()))).status).toBe(429);
+    rpcResult = (fn) => (fn === "ia_receipt_status" ? ok({ code: "PT429", message: "rate_limited" }, 429) : ok({}, 500));
+    expect((await h()(post({ action: "status", reference: "TPD-7KQ3-M9PX", token: "A".repeat(43) }))).status).toBe(429);
     rpcResult = () => ok({ code: "22023", message: "invalid officer: internal detail" }, 400);
     const res2 = await h()(post(complaint()));
     expect(res2.status).toBe(400);

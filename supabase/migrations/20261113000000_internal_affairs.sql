@@ -100,6 +100,12 @@ create table tpd.ia_cases (
   closed_at timestamptz,
   findings_notice_at timestamptz,                                    -- IA §7: member told the finding at close
   findings_notice_method text,
+  -- Confidential routing (IA §5, §11). A public complaint cannot link a member, so the officer the
+  -- complainant named is matched (text only) against IA staff and the oversight posts at intake. Anyone
+  -- matched is kept out of the case until the lead links the verified member at intake review, and the
+  -- case starts at the narrowest handler any match would need. 'verified' = linked to a personnel record.
+  routing_basis text not null default 'none' check (routing_basis in ('none', 'text_match', 'verified')),
+  provisional_excluded uuid[] not null default '{}',
   updated_at timestamptz not null default now(),
   constraint ia_case_assignment check ((assigned_investigator_id is null) = (assigned_at is null)),
   constraint ia_case_links check (cardinality(evidence_links) <= 10)
@@ -392,6 +398,9 @@ language sql stable security definer set search_path = '' as $$
     when p_accused is null then 'ia'
     when tpd.ia_post_of(p_accused) = 'chief' then 'external'
     when tpd.ia_post_of(p_accused) = 'deputy_chief' then 'chief'
+    -- IA-09 (interim): IA reports to the Major X-201 (IA §2), so IA staff would be investigating their own
+    -- supervisor, which IA §5 forbids. The Deputy Chief, who oversees IA, handles it, as for the Director.
+    when tpd.ia_post_of(p_accused) = 'major_admin' then 'deputy_chief'
     when tpd.ia_role_of(p_accused) = 'director' then 'deputy_chief'
     when tpd.ia_role_of(p_accused) is not null then 'ia_director'
     else 'ia'
@@ -419,6 +428,7 @@ begin
   select * into c from tpd.ia_cases where id = p_case;
   if not found then return false; end if;
   if c.accused_id = p_personnel then return false; end if;
+  if p_personnel = any (c.provisional_excluded) then return false; end if;
   if exists (select 1 from tpd.ia_complainants k where k.case_id = p_case and k.member_id = p_personnel) then return false; end if;
   post := tpd.ia_post_of(p_personnel);
   role := tpd.ia_role_of(p_personnel);
@@ -502,6 +512,32 @@ begin
   return 'TPD-' || substr(s, 1, 4) || '-' || substr(s, 5, 4);
 end $$;
 
+-- Members with IA access (appointees and oversight posts) whose name, roster call sign or IA call sign
+-- appears in the complainant's free text. Matching only ever narrows who can see a case.
+create or replace function tpd.ia_text_matches(p_text text) returns uuid[]
+language sql stable security definer set search_path = '' as $$
+  with staff as (
+    select p.id, p.name, p.callsign, a.callsign as ia_callsign
+    from tpd.personnel p left join tpd.ia_appointments a on a.personnel_id = p.id and a.ended_at is null
+    where p.status = 'active' and (a.id is not null or tpd.ia_post_of(p.id) is not null)
+  ), terms as (
+    select id, t from staff, lateral (values (name), (callsign), (ia_callsign),
+      -- surname of "J. Example" style roleplay names, if it is long enough to be meaningful
+      (nullif(regexp_replace(name, '^.*[\s.]', ''), ''))) v(t)
+    where t is not null and length(t) >= 3
+  )
+  select coalesce(array_agg(distinct id), '{}') from terms
+  where nullif(btrim(p_text), '') is not null
+    and p_text ~* ('(^|[^[:alnum:]])' || regexp_replace(t, '([.*+?^${}()|\[\]\\-])', '\\\1', 'g') || '($|[^[:alnum:]])')
+$$;
+
+-- Narrowest IA §5 handler needed for any of these members.
+create or replace function tpd.ia_narrowest_handler(p_members uuid[]) returns text
+language sql stable security definer set search_path = '' as $$
+  select coalesce((select h from unnest(p_members) m, lateral (select tpd.ia_handler_for(m) as h) x
+    order by array_position(array['ia', 'ia_director', 'deputy_chief', 'chief', 'external'], h) desc limit 1), 'ia')
+$$;
+
 -- ------------------------------------------------------------ intake
 
 -- Called only by the ia-intake Edge Function (service role) after it validated the
@@ -523,6 +559,8 @@ declare
   links text[];
   incident date;
   bodycam_due timestamptz;
+  matched uuid[] := '{}';
+  v_handler text;
 begin
   perform tpd.ia_require(p_client_key ~ '^[0-9a-f]{64}$', 'invalid client key', '22023');
   perform tpd.ia_require(octet_length(p_token_hash) = 32, 'invalid token hash', '22023');
@@ -530,11 +568,11 @@ begin
   insert into tpd.ia_intake_throttle (bucket, window_start, hits) values ('c:' || p_client_key, v_hour, 1)
     on conflict (bucket, window_start) do update set hits = tpd.ia_intake_throttle.hits + 1 returning tpd.ia_intake_throttle.hits into v_hits;
   if v_hits > 3 or (select coalesce(sum(t.hits), 0) from tpd.ia_intake_throttle t where t.bucket = 'c:' || p_client_key and t.window_start > now() - interval '24 hours') > 8 then
-    raise exception 'rate_limited' using errcode = 'P0429';
+    raise exception 'rate_limited' using errcode = 'PT429';
   end if;
   insert into tpd.ia_intake_throttle (bucket, window_start, hits) values ('all', v_hour, 1)
     on conflict (bucket, window_start) do update set hits = tpd.ia_intake_throttle.hits + 1 returning tpd.ia_intake_throttle.hits into v_hits;
-  if v_hits > 60 then raise exception 'rate_limited' using errcode = 'P0429'; end if;
+  if v_hits > 60 then raise exception 'rate_limited' using errcode = 'PT429'; end if;
   delete from tpd.ia_intake_throttle where window_start < now() - interval '2 days';
 
   perform tpd.ia_require(cat = any (tpd.ia_categories()), 'invalid category', '22023');
@@ -567,12 +605,23 @@ begin
   -- A public payload can never link a personnel record; IA links it after review.
   if src = 'public' and nullif(p ->> 'officerId', '') is not null then raise exception 'invalid officer' using errcode = '22023'; end if;
 
+  -- Confidential routing: with no verified member, match the named officer against IA staff and oversight.
+  if accused is null then
+    matched := tpd.ia_text_matches(coalesce(p ->> 'officer', '') || ' ' || coalesce(p ->> 'summary', ''));
+  end if;
+  v_handler := case when accused is not null then tpd.ia_handler_for(accused) else tpd.ia_narrowest_handler(matched) end;
+  if cardinality(matched) > 0 then
+    -- The person who must lead the case is never locked out of it (they outrank everyone matched).
+    matched := array_remove(matched, tpd.ia_lead_for(v_handler));
+  end if;
+
   insert into tpd.ia_cases (case_number, source, handler, category, incident_date, incident_time_approx, location, summary, description,
-                            reported_officer, accused_id, witnesses, evidence_links)
-  values ('IA-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('tpd.ia_case_seq')::text, 4, '0'), src, tpd.ia_handler_for(accused), cat,
+                            reported_officer, accused_id, witnesses, evidence_links, routing_basis, provisional_excluded)
+  values ('IA-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('tpd.ia_case_seq')::text, 4, '0'), src, v_handler, cat,
           incident, nullif(btrim(coalesce(p ->> 'incidentTime', '')), ''), nullif(btrim(coalesce(p ->> 'location', '')), ''),
           btrim(p ->> 'summary'), btrim(p ->> 'description'), nullif(btrim(coalesce(p ->> 'officer', '')), ''), accused,
-          nullif(btrim(coalesce(p ->> 'witnesses', '')), ''), links)
+          nullif(btrim(coalesce(p ->> 'witnesses', '')), ''), links,
+          case when accused is not null then 'verified' when cardinality(matched) > 0 or v_handler <> 'ia' then 'text_match' else 'none' end, matched)
   returning id into v_case;
 
   insert into tpd.ia_complainants (case_id, anonymous, name, contact, member_id)
@@ -601,7 +650,8 @@ begin
 
   insert into tpd.ia_audit_events (case_id, actor_id, actor_label, action, detail)
   values (v_case, null, 'system:ia-intake', 'case.received',
-          jsonb_build_object('source', src, 'anonymous', v_anon, 'links', cardinality(links), 'verified_officer', accused is not null));
+          jsonb_build_object('source', src, 'anonymous', v_anon, 'links', cardinality(links), 'verified_officer', accused is not null,
+                             'handler', v_handler, 'provisional_exclusions', cardinality(matched)));
   perform tpd.ia_alert_intake(v_case);
 
   return jsonb_build_object('case_id', v_case, 'reference', ref);
@@ -632,7 +682,7 @@ begin
   perform tpd.ia_require(p_client_key ~ '^[0-9a-f]{64}$', 'invalid client key', '22023');
   insert into tpd.ia_intake_throttle (bucket, window_start, hits) values ('s:' || p_client_key, date_trunc('hour', now()), 1)
     on conflict (bucket, window_start) do update set hits = tpd.ia_intake_throttle.hits + 1 returning tpd.ia_intake_throttle.hits into v_hits;
-  if v_hits > 20 then raise exception 'rate_limited' using errcode = 'P0429'; end if;
+  if v_hits > 20 then raise exception 'rate_limited' using errcode = 'PT429'; end if;
   select * into r from tpd.ia_receipts where reference = upper(btrim(p_reference));
   -- Same answer for an unknown reference and a wrong token: nothing to enumerate.
   if not found or r.token_hash <> p_token_hash then return jsonb_build_object('found', false); end if;
@@ -640,7 +690,7 @@ begin
   return jsonb_build_object(
     'found', true,
     'reference', r.reference,
-    'received_on', to_char(c.received_at at time zone 'UTC', 'YYYY-MM-DD'),
+    'received_on', to_char(c.received_at at time zone 'America/New_York', 'YYYY-MM-DD'),
     'status', case when c.status in ('closed', 'referred_external') then 'closed' when c.status = 'intake' then 'received' else 'under_review' end,
     'statement', (select d.body from tpd.ia_disclosures d where d.case_id = c.id and d.audience = 'complainant' order by d.approved_at desc limit 1));
 end $$;
@@ -834,14 +884,22 @@ begin
     perform tpd.ia_require(p_accused <> tpd.ia_me() and exists (select 1 from tpd.personnel where id = p_accused and status in ('active', 'inactive', 'suspended')), 'invalid member', '22023');
   end if;
   h := tpd.ia_handler_for(coalesce(p_accused, c.accused_id));
-  -- Escalation only ever narrows the audience; it never widens it back.
-  if array_position(array['ia', 'ia_director', 'deputy_chief', 'chief', 'external'], h) < array_position(array['ia', 'ia_director', 'deputy_chief', 'chief', 'external'], c.handler) then h := c.handler; end if;
+  -- Escalation only ever narrows the audience; it never widens it back. The one exception: a case routed
+  -- provisionally from free text may be re-routed once the lead (who outranks everyone matched) links the
+  -- verified member; the text-based exclusions then give way to the verified accused.
+  if array_position(array['ia', 'ia_director', 'deputy_chief', 'chief', 'external'], h) < array_position(array['ia', 'ia_director', 'deputy_chief', 'chief', 'external'], c.handler)
+     and not (c.routing_basis = 'text_match' and p_accused is not null) then
+    h := c.handler;
+  end if;
   update tpd.ia_cases set accused_id = coalesce(p_accused, accused_id), handler = h,
+    routing_basis = case when coalesce(p_accused, c.accused_id) is not null then 'verified' else c.routing_basis end,
+    provisional_excluded = case when c.routing_basis = 'text_match' and p_accused is not null then '{}' else c.provisional_excluded end,
     status = case when h = 'external' then 'referred_external' else 'unassigned' end,
     closed_at = case when h = 'external' then now() end
   where id = p_case;
   insert into tpd.ia_notes (case_id, author_id, body) values (p_case, tpd.ia_me(), 'Intake review: ' || btrim(p_note));
-  perform tpd.ia_log(p_case, 'intake.accepted', jsonb_build_object('handler', h, 'accused_linked', coalesce(p_accused, c.accused_id) is not null));
+  perform tpd.ia_log(p_case, 'intake.accepted', jsonb_build_object('handler', h, 'from_handler', c.handler, 'accused_linked', coalesce(p_accused, c.accused_id) is not null,
+                    'provisional_cleared', c.routing_basis = 'text_match' and p_accused is not null));
   if h <> c.handler then perform tpd.ia_alert_intake(p_case); end if;
   return h;
 end $$;
@@ -865,6 +923,8 @@ begin
   perform tpd.ia_require(p_investigator is distinct from c.accused_id, 'An investigator cannot investigate themselves (IA §5)', '22023');
   perform tpd.ia_require(not exists (select 1 from tpd.ia_complainants k where k.case_id = p_case and k.member_id = p_investigator), 'The complainant cannot investigate', '22023');
   perform tpd.ia_require(not exists (select 1 from tpd.ia_conflicts f where f.case_id = p_case and f.personnel_id = p_investigator and f.kind = 'declared_conflict'), 'This investigator declared a conflict on this case', '22023');
+  -- Anyone the case is hidden from (accused, complainant, provisionally excluded) can never be assigned to it.
+  perform tpd.ia_require(tpd.ia_can_view_as(p_investigator, p_case), 'This member cannot be assigned to this case (IA §5, §11)', '22023');
   update tpd.ia_cases set assigned_investigator_id = p_investigator, assigned_at = now(),
     due_at = coalesce(case when c.assigned_investigator_id is not null then c.due_at end, now() + interval '7 days'), status = 'investigating'
   where id = p_case;
@@ -1300,5 +1360,17 @@ do $$ begin
     values ('tpd-ia-evidence', 'tpd-ia-evidence', false, 26214400,
             array['image/png', 'image/jpeg', 'image/webp', 'video/mp4', 'video/webm', 'application/pdf'])
     on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+  end if;
+end $$;
+
+-- Defence in depth for the shared project: storage.objects may carry permissive policies written for
+-- another app (District Five). A RESTRICTIVE policy is ANDed with every permissive one, so no anon or
+-- signed-in client can list, read, sign, write or delete IA evidence whatever else exists. The Edge
+-- Functions use the service role, which bypasses RLS.
+do $$ begin
+  if exists (select 1 from pg_tables where schemaname = 'storage' and tablename = 'objects') then
+    drop policy if exists tpd_ia_evidence_service_only on storage.objects;
+    create policy tpd_ia_evidence_service_only on storage.objects as restrictive for all to anon, authenticated
+      using (bucket_id is distinct from 'tpd-ia-evidence') with check (bucket_id is distinct from 'tpd-ia-evidence');
   end if;
 end $$;
