@@ -120,6 +120,7 @@ investigator, not computed, because the roster holds no supervision links.
 
 | # | Action | Where | Verify |
 |---|---|---|---|
+| 0 | Only if Daily Patrol Evaluation ships in the same release (integrated branch `claude/project-thread-xrbp5s`): apply `supabase/migrations/20261112000000_daily_patrol_evaluations.sql` first, the same way. Skip it when releasing PR #5 alone. | SQL editor | `to_regclass('tpd.daily_patrol_evaluations')` is not null |
 | 1 | Apply `supabase/migrations/20261113000000_internal_affairs.sql` (schema `tpd`, bucket `tpd-ia-evidence`, one restrictive storage policy). Paste the whole file once; it runs as one transaction and fails safe if run twice. Do **not** use `supabase db push`: two migration files share version `20261105000000` and the CLI rejects that. | SQL editor | Re-run the preflight: 17 IA tables, bucket private, policy `tpd_ia_evidence_service_only` present |
 | 2 | Set secret `IA_INTAKE_PEPPER` (random, ≥ 32 chars, e.g. `openssl rand -base64 48`); confirm `ALLOWED_ORIGINS`. Leave `TURNSTILE_SECRET` unset. | Edge Functions > Secrets | Names listed; values never shown |
 | 3 | Deploy `ia-intake` and `ia-evidence` from the bundles in project files (`ia-release/ia-intake.js`, `ia-release/ia-evidence.js`), **Verify JWT OFF** for both (they authenticate callers themselves). | Edge Functions editor | Both listed as active |
@@ -159,6 +160,11 @@ investigator, not computed, because the roster holds no supervision links.
   `docs/*`, `src/components/shell/nav-config.ts`, `supabase/tests/rls.test.sql`, `supabase/tests/run-local.sh` and
   `tests/e2e/mobile.spec.ts` (PR #4 also `src/app/(public)/page.tsx`); all are additive and resolvable at merge time.
   Both PRs fix the same stale `rls.test.sql` query.
+- **Integrated branch (2026-11-14):** `claude/project-thread-xrbp5s` = PR #5 + PR #4 (which contains PR #2), all nine
+  conflicts resolved additively (nav keeps Internal Affairs and Command Center > Evaluations; the SQL runner tests every
+  suite in a fresh database; the mobile sweep covers both features; POLICY_CONFLICTS keeps DPE as section I and the IA
+  SOP questions as section J). Verified there: typecheck, lint, Vitest, SQL dpe/ia/rls, default and fake-backend
+  Playwright, and the 172-check staging harness on a stack with both migrations applied. See TEST_RESULTS.md.
 - **PR #1:** conflicts only in `docs/IMPLEMENTATION_STATUS.md`. **PR #3:** none.
 - Deploying PR #5 alone replaces the current Pages demo build of PR #2; DPE stays unreleased either way (its migration
   is not applied).

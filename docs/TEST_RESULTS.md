@@ -112,3 +112,22 @@ E2E coverage: two-action no-observations report; full report with three officers
 Bugs found by these tests and fixed: draft autosave disabled the officer search while saving, which closed the list mid-selection; the first draft save remounted the form (key included the report status), dropping focus and any edit made during the save.
 
 Not tested: real Supabase (migration not applied), true parallel submissions, screen readers, Safari and Firefox.
+
+## Integrated release branch · 2026-11-14 · `claude/project-thread-xrbp5s` (PR #5 + PR #4 + PR #2)
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck` | Pass |
+| `npm run lint` | Pass, 0 errors (2 pre-existing warnings) |
+| `npm test` (Vitest) | 239 passed, 13 files |
+| `supabase/tests/run-as-nonroot.sh` (fresh DB per suite) | ALL DPE, ALL IA and ALL RLS TESTS PASSED |
+| `npx playwright test` (demo build, desktop + Pixel 7) | 47 passed, 26 skipped (live-mode suites, run below) |
+| Fake-backend build, `E2E_FAKE_BACKEND=1` with staging env | 26 passed (14 integrations, 4 evaluations-live, 8 IA against real staging), 2 skipped (no-backend checks, covered by the demo run) |
+| `tests/staging/ia-staging.mjs` on local Supabase with all 14 migrations (DPE and IA) | 172 passed, 0 failed |
+| `STATIC_EXPORT=1 PAGES_BASE_PATH=/tpd-dashboard next build` | Pass; secret scan of `out/` clean (no service key, pepper, JWT secret or guild ID) |
+| Mobile overflow sweep (Pixel 7) | No overflow on 19 screens, including IA, AnchorCAD and both evaluation pages |
+
+Not verified anywhere: the live Supabase project, live Discord sign-in, roster sync against the real sheet, and the
+production website in live mode. Edge Functions were type-checked by the Supabase edge runtime while serving staging
+(`deno` is not installed in this sandbox). Running the whole suite against a fake-backend build used to fail 42
+demo-data tests that cannot apply in live mode; `playwright.config.ts` now runs only the live-mode suites for that build.
