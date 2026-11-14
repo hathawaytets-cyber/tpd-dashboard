@@ -224,3 +224,11 @@ lists the same 13 active members as TPD Roster; Records has no entries.
 - **Source B:** The integration directive (2026-11-04) asks for leadership and division command to be named; the roster sheet itself is publicly readable.
 - **Current state:** Only roleplay names as written on the roster ("J. Quinellope"), call signs, ranks and appointments are stored. Discord IDs, Roblox usernames, timezones, hire dates and disciplinary points are never stored (enforced by a unit test that fails on any Discord-ID-shaped number in `src`).
 - **Leadership confirmation needed:** dede chooses whether names are shown (asked 2026-11-04).
+
+## I. Internal Affairs SOP (checked 2026-11-13)
+
+The IA SOP was read in full. The items it leaves open are listed as **IA-01 to IA-15** in
+[INTERNAL_AFFAIRS.md](INTERNAL_AFFAIRS.md#open-policy-questions-interim-behaviour-in-brackets), each with the interim
+behaviour the code uses. Every one is a decision for dede and IA leadership; none is presented as TPD policy.
+Highest impact: IA-01 (who is alerted), IA-06 (what a complainant may learn), IA-07 (complaints against the Chief),
+IA-10 (Garrity text) and IA-11 (discipline ladder and points). IA-04 depends on PC-14 (timezone).

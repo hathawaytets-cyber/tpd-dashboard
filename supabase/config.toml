@@ -20,3 +20,12 @@ verify_jwt = false
 
 [functions.integration-health]
 verify_jwt = false
+
+# Public complaint intake: callers are usually not signed in. The function authenticates a member
+# itself when a session token is present; everything else is the public, rate-limited path.
+[functions.ia-intake]
+verify_jwt = false
+
+# Staff evidence: authenticates the caller with Supabase Auth, then checks IA access as that caller.
+[functions.ia-evidence]
+verify_jwt = false

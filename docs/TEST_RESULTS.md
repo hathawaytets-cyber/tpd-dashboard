@@ -63,3 +63,35 @@ Production build, headless Chromium. tsc and lint pass; build succeeds.
 Bugs found and fixed: dashboard table forced phones to zoom out (layout 491 px on a 412 px screen); patrol hero image reduced contrast behind actions; decision queue actions clipped at 1440 px.
 
 Limits: all data is the browser-local preview store. "Server-side" checks are the store's operation guards, which mirror the planned server contracts; they are not a server. Not yet tested: axe scan, screen readers, Safari and Firefox.
+
+## Internal Affairs and AnchorCAD · 2026-11-13 · branch `feature/internal-affairs-anchorcad`
+
+| Check | Result |
+|-------|--------|
+| `npm run typecheck` | Pass |
+| `npm run lint` | Pass, 0 errors (2 pre-existing warnings in files this branch does not touch) |
+| `npm test` (Vitest) | 225 passed, 12 files (new: IA model, intake client, IA Edge Function helpers) |
+| `supabase/tests/run-local.sh` (PostgreSQL, fresh DB per suite) | `ia.test.sql` ALL IA TESTS PASSED; `rls.test.sql` ALL RLS TESTS PASSED (fixed pre-existing failure) |
+| `deno check` ia-intake, ia-evidence | Pass |
+| `STATIC_EXPORT=1 next build` | Pass; `/report`, `/report/status`, `/hq/report`, `/hq/internal-affairs{,/case,/appointments}`, `/hq/cad` exported. No service key, CAD key or pepper in `out/` |
+| `npx playwright test` | 37 passed, 14 skipped (the stubbed-backend suite, which skips in the preview build as before) |
+| Mobile overflow sweep (Pixel 7) | No overflow on the six new screens |
+| Screenshots | 1440 px and 390 px, light and dark, reviewed |
+
+## Internal Affairs release validation · 2026-11-14 · PR #5
+
+Real local Supabase stack (Postgres 17, Auth, PostgREST, Storage, Edge Runtime), not the live project. Details in
+[IA_RELEASE.md](IA_RELEASE.md).
+
+| Check | Result |
+|-------|--------|
+| `tests/staging/ia-staging.mjs` | 172 passed, 0 failed |
+| `tests/e2e/ia-staging.spec.ts` (browser → staging) | 8 passed |
+| `tests/e2e/integrations.spec.ts` fake-backend (previously skipped) | 14 passed (4 stale stubs repaired) |
+| `npx playwright test` (preview build) | 37 passed, 22 skipped (the two suites above, run separately) |
+| SQL suites (IA, RLS; plus DPE with PR #2's migration) | pass |
+| typecheck, lint, Vitest | pass, 0 errors, 225 passed |
+| Static export + secret scan | pass, clean |
+
+Defects found and fixed: rate-limited requests returned HTTP 500 (SQLSTATE P0429 → now PT429/429); public complaints
+naming IA staff reached the named person's queue; complaints against the Major X-201 were investigated by IA.

@@ -112,3 +112,24 @@ Not deployed: the live preview does not include Phase 2.
 - Shared project audited read-only: District Five authorization is membership/admin based (RLS plus SECURITY DEFINER RPCs, no table write grants for `anon`/`authenticated`), so a TPD login gets only a profile row. `tpd` grants are SELECT-only for `authenticated`, none for `anon`. Findings for dede (District Five side, not changed): email sign-ups are enabled and `handle_new_user` copies `provider_id` from user-editable metadata, so an email sign-up could claim a pre-seeded District Five roster slot; today there are 0 such slots and 0 email identities.
 - Roster removals: deferred until approved or seen in 3 independent snapshots (migration `20261105000100`). Approval is bound to the previewed snapshot hash.
 - Edge Functions: authenticate before parsing bodies, constant-time secret check, body size and shape limits, 81 HTTP-level negative tests. Live 405/401 probes recorded in the activation checklist.
+
+## Internal Affairs and AnchorCAD · code complete, not deployed (2026-11-13)
+
+2026-11-14: validated on a real Supabase staging stack (172/172 checks, 8 real-backend browser tests); three defects fixed. Verdict, decision matrix and the production plan: [IA_RELEASE.md](IA_RELEASE.md). Still not applied live or deployed.
+
+Branch `feature/internal-affairs-anchorcad`. Details: [INTERNAL_AFFAIRS.md](INTERNAL_AFFAIRS.md), AnchorCAD section of
+[INTEGRATIONS.md](INTEGRATIONS.md).
+
+Done
+- Public "Report an officer" form (`/report`) and receipt lookup (`/report/status`), no sign-in; member form at `/hq/report`.
+- IA database: 17 tables, RLS with no direct grants, SOP workflow functions, append-only audit, private evidence bucket.
+- `ia-intake` and `ia-evidence` Edge Functions (rate limiting, file sniffing, hashed tokens, server-side authorization).
+- IA workspace: case queues, case file with every SOP step, appointments managed by the Deputy Chief.
+- AnchorCAD workspace (`/hq/cad`): join link, panel link, capability matrix; launch-and-reference only.
+- Fixed the pre-existing `rls.test.sql` failure (it still queried the retired `personnel_directory` view).
+
+Not done / blocked
+- Migration not applied, functions not deployed, `IA_INTAKE_PEPPER` not set (needs dede's approval).
+- IA-01 to IA-15 policy questions open; interim behaviour documented.
+- Roster Records tab entries are a confirmed manual task; the site never writes the roster sheet.
+- AnchorCAD read-only sync designed, not built (needs a key and approval).
